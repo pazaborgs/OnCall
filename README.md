@@ -25,8 +25,6 @@ O sistema cuida da burocracia: valida horários, impede conflitos e notifica os 
 
 Como o foco deste projeto é **Engenharia de Backend** (Python/Django) e a complexidade das regras de negócio, utilizei ferramentas de **IA Generativa** para acelerar a prototipagem e estilização do Frontend. Isso me permite dedicar mais tempo à arquitetura do banco de dados, testes automatizados e segurança das transações.
 
-- Se alguem quiser ajudar, tamo junto
-
 ## ✨ Funcionalidades Principais
 
 ### 📅 Agenda Inteligente
@@ -117,16 +115,6 @@ erDiagram
 
 A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Utilizei ferramentas visuais para mapear tanto a estrutura de dados quanto a jornada do usuário, garantindo que o backend suportasse todas as regras de negócio necessárias.
 
-### 1. Modelagem de Dados (ERD)
-
-Diagrama Entidade-Relacionamento desenhado para garantir a integridade das trocas e a escalabilidade dos grupos.
-
-![Modelagem de Dados](readme_img/modelagem_dados.jpg)
-
-### 2. Prototipagem e Fluxos de UX
-
-Esboços visuais utilizados para definir a experiência do usuário antes da implementação do Frontend.
-
 <details>
   <summary><strong>Ver Fluxos de Interface (Clique para expandir)</strong></summary>
 
@@ -135,7 +123,7 @@ Esboços visuais utilizados para definir a experiência do usuário antes da imp
 **Onboarding e Entrada nos Grupos**
 
 > Fluxo de convite via token e criação de conta.
-> ![Onboarding](readme_imgs/onboarding.jpg)
+> !
 
 **Painel de Funcionalidades (Dashboard)**
 
