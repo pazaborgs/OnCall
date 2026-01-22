@@ -123,17 +123,17 @@ A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Ut
 **Onboarding e Entrada nos Grupos**
 
 > Fluxo de convite via token e criação de conta.
-> !
+> ![Onboarding](readme_img/onboarding.jpg)
 
 **Painel de Funcionalidades (Dashboard)**
 
 > Visão geral das funcionalidades acessíveis ao usuário logado.
-> ![Painel de Funcionalidades](readme_imgs/painel_funcs.jpg)
+> ![Painel de Funcionalidades](readme_img/painel_funcs.jpg)
 
 **Fluxo de Troca de Plantões**
 
 > A lógica visual da proposta, validação e aceite de trocas.
-> ![Troca de Plantões](readme_imgs/troca_plantoes.jpg)
+> ![Troca de Plantões](readme_img/troca_plantoes.jpg)
 
 </details>
 
