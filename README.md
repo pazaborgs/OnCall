@@ -1,0 +1,224 @@
+# 🏥 OnCall - Sistema de Gestão de Escalas
+
+> **🚧 Status do Projeto:** Em desenvolvimento ativo (MVP funcional).
+
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange)
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Django](https://img.shields.io/badge/Django-5.0-green)
+![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
+
+## 🎯 O Desafio
+
+A gestão de escalas é um problema complexo. Planilhas quebradas, mensagens perdidas no WhatsApp e a confusão na hora de trocar um plantão são dores comuns em equipes médicas e de enfermagem.
+
+O **OnCall** é uma aplicação web para resolver esse caos, garantindo que ninguém falte por falha de comunicação e que a gestão saiba exatamente quem está de plantão.
+
+## 💡 A Solução
+
+Desenvolvi uma plataforma centralizada, onde o diferencial não é apenas mostrar a agenda, mas permitir que os próprios profissionais **negociem suas trocas** de forma autônoma e segura.
+
+O sistema cuida da burocracia: valida horários, impede conflitos e notifica os envolvidos, garantindo que a escala oficial esteja sempre atualizada sem depender de intervenção manual constante.
+
+---
+
+### 🤖 Nota sobre o Desenvolvimento
+
+Como o foco deste projeto é **Engenharia de Backend** (Python/Django) e a complexidade das regras de negócio, utilizei ferramentas de **IA Generativa** para acelerar a prototipagem e estilização do Frontend. Isso me permite dedicar mais tempo à arquitetura do banco de dados, testes automatizados e segurança das transações.
+
+- Se alguem quiser ajudar, tamo junto
+
+## ✨ Funcionalidades Principais
+
+### 📅 Agenda Inteligente
+
+- **Visão Mensal & Anual:** Calendários intuitivos com indicadores visuais de status.
+- **Extrato Pessoal:** Um filtro rápido para o profissional ver "quando eu trabalho?" sem se perder na escala geral.
+- **Histórico:** Navegação fluida entre meses e anos passados ou futuros.
+
+### 🔄 Sistema de Trocas (Trade System)
+
+O coração do projeto. Um fluxo transacional atômico para gerenciar substituições:
+
+- **Oferta de Plantão:** O usuário sinaliza: _"Posso trocar este dia"_.
+- **Propostas Flexíveis:** Outros colegas podem oferecer:
+  - _"Assumo seu plantão"_ (Doação).
+  - _"Troco pelo meu dia X"_ (Permuta/Swap).
+- **Validação Automática:** O sistema barra propostas duplicadas ou inválidas antes mesmo de incomodar o dono do plantão.
+- **Troca Segura:** Quando o aceite ocorre, o banco de dados transfere a titularidade instantaneamente.
+
+### 👥 Gestão de Equipes
+
+- **Onboarding sem Fricção:** Convites via Link Único (Hash) ou Código de Acesso, facilitando a entrada de novos médicos no grupo.
+- **Tipos Personalizáveis:** Suporte para diferentes dinâmicas (Noturno, Diurno, Sobreaviso...).
+
+## 🛠️ Arquitetura e Fluxos
+
+### 1. O Ciclo de Vida de uma Troca
+
+Este diagrama ilustra como o sistema gerencia os estados de uma solicitação, desde a proposta até a efetivação no banco de dados.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> PENDING : Usuário B envia proposta
+
+    state "Aguardando Decisão" as PENDING
+
+    PENDING --> REJECTED : Dono (A) Recusa
+    PENDING --> CANCELLED : Solicitante (B) Desiste
+
+    note right of PENDING
+        O sistema bloqueia
+        novas propostas duplicadas
+        nesta etapa.
+    end note
+
+    %% Fluxo Feliz
+    PENDING --> APPROVED : Dono (A) Aceita
+
+    state "Troca Realizada" as APPROVED
+
+    APPROVED --> [*] : Titularidade Transferida
+    REJECTED --> [*] : Notifica B
+    CANCELLED --> [*]
+
+```
+
+### 2. Modelagem de Dados (Core)
+
+Estrutura relacional simplificada mostrando como as solicitações de troca conectam usuários e turnos.
+
+```mermaid
+erDiagram
+    User ||--o{ Group : "Pertence a"
+    User ||--o{ Shift : "Possui (Owner)"
+
+    TradeRequest }|..|| User : "Requester (Quem pede)"
+    TradeRequest }|..|| Shift : "Target (Plantão Alvo)"
+    TradeRequest |o..o| Shift : "Offered (Oferta/Opcional)"
+
+    TradeRequest {
+        int id PK
+        string status "PENDING, APPROVED, REJECTED"
+        text message "Motivo da troca"
+        datetime created_at
+    }
+
+    Shift {
+        int id PK
+        datetime start_time
+        bool is_active
+        bool tradable "Disponível para troca?"
+    }
+
+```
+
+## 🧠 Planejamento e Arquitetura
+
+A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Utilizei ferramentas visuais para mapear tanto a estrutura de dados quanto a jornada do usuário, garantindo que o backend suportasse todas as regras de negócio necessárias.
+
+### 1. Modelagem de Dados (ERD)
+
+Diagrama Entidade-Relacionamento desenhado para garantir a integridade das trocas e a escalabilidade dos grupos.
+
+![Modelagem de Dados](readme_img/modelagem_dados.jpg)
+
+### 2. Prototipagem e Fluxos de UX
+
+Esboços visuais utilizados para definir a experiência do usuário antes da implementação do Frontend.
+
+<details>
+  <summary><strong>Ver Fluxos de Interface (Clique para expandir)</strong></summary>
+
+  <br>
+
+**Onboarding e Entrada nos Grupos**
+
+> Fluxo de convite via token e criação de conta.
+> ![Onboarding](readme_imgs/onboarding.jpg)
+
+**Painel de Funcionalidades (Dashboard)**
+
+> Visão geral das funcionalidades acessíveis ao usuário logado.
+> ![Painel de Funcionalidades](readme_imgs/painel_funcs.jpg)
+
+**Fluxo de Troca de Plantões**
+
+> A lógica visual da proposta, validação e aceite de trocas.
+> ![Troca de Plantões](readme_imgs/troca_plantoes.jpg)
+
+</details>
+
+## 🚀 Como Rodar Localmente
+
+Pré-requisitos: Python 3.10+ instalado.
+
+1. **Clone o repositório**
+
+```bash
+git clone https://github.com/pazaborgs/OnCall
+cd OnCall
+```
+
+2. **Crie e ative o ambiente virtual**
+
+```bash
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# Linux/Mac
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3. **Instale as dependências**
+
+```bash
+pip install -r requirements.txt
+```
+
+4. **Configure as Variáveis**
+   Crie um arquivo `.env` na raiz do projeto:
+
+```env
+SECRET_KEY=sua_chave_secreta_local
+DEBUG=True
+
+# Email não é necessário para testes locais
+```
+
+5. **Prepare o Banco de Dados**
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser # Crie seu admin
+```
+
+6. **Rode a Aplicação**
+
+```bash
+python manage.py runserver
+```
+
+Acesse: `http://127.0.0.1:8000`
+
+## 🧪 Qualidade de Código
+
+O projeto conta com uma suíte de testes automatizados focada nas regras de negócio críticas (trocas e permissões).
+
+```bash
+python manage.py test shifts
+```
+
+## 📝 Roadmap (Próximos Passos)
+
+- [x] MVP: Gestão de Plantões e Trocas Básicas.
+- [x] Testes Automatizados.
+- [ ] **Visualização Anual:** Grid de calendário anual para planejamento de longo prazo.
+- [ ] **Modo Supervisionado:** Fluxo onde a troca requer aprovação final de um "Chefe de Equipe".
+- [ ] **Deploy:** Configuração de ambiente de produção e Email SMTP real.
+
+---
+
+👉🏽 Autor do Código: [Patrick Regis](https://www.linkedin.com/in/patrickrgsanjos)

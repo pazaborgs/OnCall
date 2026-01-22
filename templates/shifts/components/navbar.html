@@ -1,0 +1,108 @@
+<nav class="navbar sticky-top navbar-light bg-white shadow-sm px-3 navbar-custom">
+    <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+            <span class="navbar-brand fw-bold text-primary me-2 me-md-3">On Call</span>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle fw-bold text-truncate shadow-sm"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style="max-width: 400px">{{ active_group.name }}</button>
+                <ul class="dropdown-menu shadow border-0 mt-1">
+                    <li>
+                        <h6 class="dropdown-header text-uppercase small fw-bold text-muted">Meus Grupos</h6>
+                    </li>
+                    {% for grp in user_groups %}
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center py-2 {% if grp.id == active_group.id %}active{% endif %}"
+                               href="?group_id={{ grp.id }}">
+                                <span class="text-truncate" style="max-width: 200px;">{{ grp.name }}</span>
+                                {% if grp.id == active_group.id %}<span class="badge bg-white text-primary rounded-pill ms-2">✓</span>{% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    <li>
+                        <button class="dropdown-item text-primary fw-bold py-2 d-flex align-items-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#createGroupModal">
+                            <span class="me-2 fs-5 lh-1">+</span> Criar Novo Grupo
+                        </button>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <button class="dropdown-item text-dark py-2 d-flex align-items-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#inviteModal">
+                            <i class="bi bi-link me-2"></i> Convidar Pessoas
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item text-dark py-2 d-flex align-items-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#joinGroupModal">
+                            <i class="bi bi-ticket-perforated me-2"></i> Entrar com Código
+                        </button>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <button class="dropdown-item text-dark py-2 d-flex align-items-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#membersModal">
+                            <i class="bi bi-people-fill me-2 text-primary"></i> Ver Membros do Grupo
+                        </button>
+                    </li>
+                    {% if active_group.admin == user %}
+                        <li>
+                            <a class="dropdown-item text-dark py-2 d-flex align-items-center"
+                               href="{% url 'manage_shift_types' %}">
+                                <i class="bi bi-gear-fill me-2 text-muted"></i> Gerenciar Plantões
+                            </a>
+                        </li>
+                        <li>
+                            <button class="dropdown-item text-danger py-2 d-flex align-items-center"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteGroupModal">
+                                <i class="bi bi-trash-fill me-2"></i> Excluir Grupo
+                            </button>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="dropdown">
+            <a href="#"
+               class="d-block link-dark text-decoration-none"
+               data-bs-toggle="dropdown">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                     style="width: 38px;
+                            height: 38px">{{ user.email|slice:":2"|upper }}</div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2">
+                <li class="px-3 py-2 text-muted small border-bottom">
+                    Logado como
+                    <br>
+                    <strong>{{ user.email }}</strong>
+                </li>
+                <li>
+                    <a class="dropdown-item text-dark py-2 d-flex align-items-center"
+                       href="{% url 'profile_view' %}">
+                        <i class="bi bi-person-circle me-2 text-secondary"></i> Meu Perfil
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <form action="{% url 'account_logout' %}" method="post" class="p-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">Sair da Conta</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

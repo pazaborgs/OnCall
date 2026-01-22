@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Gerenciar Plantões - {{ group.name }}{% endblock %}
+{% block content %}
+    <div class="container mt-4" style="max-width: 800px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Tipos de Plantão</h4>
+                <span class="text-muted small">{{ group.name }}</span>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold py-3">Adicionar Novo</div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ form.name.label_tag }}
+                                {{ form.name }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.color.label_tag }}
+                                {{ form.color }}
+                            </div>
+                            <div class="mb-3 form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Ativo para novos plantões?</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Salvar Tipo</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for type in types %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle me-3 shadow-sm"
+                                             style="width: 24px;
+                                                    height: 24px;
+                                                    background-color: {{ type.color }};
+                                                    border: 1px solid rgba(0,0,0,0.1)"></div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">{{ type.name }}</h6>
+                                            {% if not type.is_active %}
+                                                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.65rem">INATIVO</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item text-center text-muted py-4">Nenhum tipo cadastrado ainda.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

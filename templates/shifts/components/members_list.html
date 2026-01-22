@@ -1,0 +1,120 @@
+<div class="modal fade" id="membersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-white border-bottom-0 pb-0">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark">Membros do Grupo</h5>
+                    <p class="text-muted small mb-0">{{ active_group.name }}</p>
+                </div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text"
+                           class="form-control bg-light border-start-0"
+                           placeholder="Buscar por nome ou email..."
+                           id="memberSearchInput"
+                           onkeyup="filterMembers()">
+                </div>
+                <div class="list-group list-group-flush" id="membersList">
+                    {% for member in group_members %}
+                        <div class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between member-item">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm me-3"
+                                     style="width: 45px;
+                                            height: 45px;
+                                            font-size: 1.2rem">{{ member.email|slice:":2"|upper }}</div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold text-dark member-name">
+                                        {{ member.full_name|default:"Nome Indefinido" }}
+                                        {% if member.id == user.id %}
+                                            <span class="badge bg-primary-subtle text-primary ms-1"
+                                                  style="font-size: 0.6rem">VOCÊ</span>
+                                        {% endif %}
+                                        {% if member == active_group.admin %}
+                                            <span class="badge bg-warning-subtle text-warning-emphasis ms-1"
+                                                  style="font-size: 0.6rem">ADMIN</span>
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted member-email">{{ member.email }}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                {% if member.phone %}
+                                    <a href="https://wa.me/55{{ member.phone|cut:'('|cut:')'|cut:' '|cut:'-' }}"
+                                       target="_blank"
+                                       class="btn btn-sm btn-success rounded-pill text-white fw-bold"
+                                       title="Chamar no WhatsApp">
+                                        <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline ms-1">WhatsApp</span>
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small fst-italic">Sem telefone</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted">Nenhum membro encontrado.</div>
+                    {% endfor %}
+                    <div id="noResultsMessage" class="text-center py-4 text-muted d-none">Nenhum membro encontrado para esta busca.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function filterMembers() {
+        // 1. Pega o valor digitado
+        var input = document.getElementById('memberSearchInput');
+        var filter = input.value.toLowerCase(); // Converte para minúsculo para facilitar busca
+
+        // 2. Pega a lista e os itens
+        var list = document.getElementById("membersList");
+        var items = list.getElementsByClassName("member-item");
+        var visibleCount = 0;
+
+        // 3. Itera sobre cada cartão de membro
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+
+            // Busca os elementos de texto
+            var nameEl = item.getElementsByClassName("member-name")[0];
+            var emailEl = item.getElementsByClassName("member-email")[0];
+
+            if (nameEl && emailEl) {
+                // Pega o conteúdo de texto
+                var nameText = nameEl.textContent || nameEl.innerText;
+                var emailText = emailEl.textContent || emailEl.innerText;
+
+                // Junta nome e email numa string só para testar
+                var combinedText = (nameText + " " + emailText).toLowerCase();
+
+                // Verifica se o texto digitado está contido no nome ou email
+                if (combinedText.indexOf(filter) > -1) {
+                    // MOSTRA: Remove d-none e garante d-flex para o layout ficar certo
+                    item.classList.remove("d-none");
+                    item.classList.add("d-flex");
+                    visibleCount++;
+                } else {
+                    // ESCONDE: Adiciona d-none e remove d-flex
+                    item.classList.add("d-none");
+                    item.classList.remove("d-flex");
+                }
+            }
+        }
+
+        // 4. Mostra aviso se não sobrou ninguém
+        var noResults = document.getElementById("noResultsMessage");
+        if (visibleCount === 0 && items.length > 0) {
+            noResults.classList.remove("d-none");
+        } else {
+            noResults.classList.add("d-none");
+        }
+    }
+</script>

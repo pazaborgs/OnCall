@@ -1,0 +1,10 @@
+<div class="d-flex justify-content-between align-items-center controls-bar py-3 mb-4">
+    <a href="?group_id={{ active_group.id }}&month={{ prev_date.month }}&year={{ prev_date.year }}"
+       class="btn btn-light border shadow-sm btn-control-nav">&lt;</a>
+    <div class="text-center">
+        <h5 class="mb-0 fw-bold text-uppercase text-dark"
+            style="letter-spacing: 0.5px">{{ current_date|date:"F Y" }}</h5>
+    </div>
+    <a href="?group_id={{ active_group.id }}&month={{ next_date.month }}&year={{ next_date.year }}"
+       class="btn btn-light border shadow-sm btn-control-nav">&gt;</a>
+</div>

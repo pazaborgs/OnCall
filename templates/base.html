@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}
+                On Call
+            {% endblock title %}
+        </title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+              rel="stylesheet">
+        <style>
+            body {
+                background-color: #f8f9fa;
+                /* Fundo cinza claro suave */
+            }
+
+            .card-login {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-primary {
+                background-color: #0d6efd;
+                /* Azul padrão, pode mudar para a cor do hospital */
+                padding: 12px;
+                font-weight: 600;
+            }
+        </style>
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <div class="container">
+            {% if messages %}
+                <div class="container mt-3 position-relative" style="z-index: 2000;">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm"
+                             role="alert"
+                             id="msg-{{ forloop.counter }}">
+                            {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            {% elif message.tags == 'danger' or message.tags == 'error' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% endif %}
+                            {{ message }}
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <script>
+                    setTimeout(function() {
+                        var alerts = document.querySelectorAll('.alert');
+                        alerts.forEach(function(alert) {
+                            // Usa a API do Bootstrap para fechar suavemente
+                            var bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        });
+                    }, 5000); // 5000ms = 5 segundos
+                </script>
+            {% endif %}
+            {% block content %}
+            {% endblock content %}
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

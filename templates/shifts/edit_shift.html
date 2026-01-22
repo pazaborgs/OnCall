@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Editar Plantão{% endblock %}
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0 fw-bold">Editar Plantão</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">Tipo</label>
+                                {{ form.shift_type }}
+                            </div>
+                            <div class="row g-2 mb-4">
+                                <div class="col-7">
+                                    <label class="form-label fw-bold small text-muted">Início</label>
+                                    {{ form.start_time }}
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label fw-bold small text-muted">Duração</label>
+                                    {{ form.duration }}
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-light text-muted">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

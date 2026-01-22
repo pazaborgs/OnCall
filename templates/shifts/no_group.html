@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    Bem-vindo ao On Call
+{% endblock title %}
+{% block content %}
+    <div class="container min-vh-100 d-flex flex-column justify-content-center align-items-center text-center pb-5">
+        <div class="mb-4 text-primary opacity-75">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="80"
+                 height="80"
+                 fill="currentColor"
+                 class="bi bi-clipboard2-pulse-fill"
+                 viewBox="0 0 16 16">
+                <path d="M10 .5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5.5.5 0 0 1-.5.5.5.5 0 0 0-.5.5V2a.5.5 0 0 0 .5.5h5A.5.5 0 0 0 11 2v-.5a.5.5 0 0 0-.5-.5.5.5 0 0 1-.5-.5" />
+                <path d="M4.085 1H3.5A1.5 1.5 0 0 0 2 2.5v12A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 12.5 1h-.585q.084.236.085.5V2a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 4 2v-.5q.001-.264.085.5M9.98 5.356 11.372 10h.128a.5.5 0 0 1 0 1H11a.5.5 0 0 1-.479-.356l-.94-3.135-1.092 5.096a.5.5 0 0 1-.968.039L6.383 8.85l-.936 1.873A.5.5 0 0 1 5 11h-.5a.5.5 0 0 1 0-1h.191l1.362-2.724a.5.5 0 0 1 .926.08l.94 3.135 1.092-5.096a.5.5 0 0 1 .968-.039Z" />
+            </svg>
+        </div>
+        <h2 class="fw-bold text-dark mb-3">Vamos começar!</h2>
+        <p class="text-muted mb-5 lead" style="max-width: 500px;">
+            Você ainda não faz parte de nenhuma escala.
+            <br>
+            Crie um novo grupo, entre com um código ou aguarde o convite.
+        </p>
+        <div class="w-100" style="max-width: 600px;">
+            <div class="d-flex flex-column gap-3 justify-content-center align-items-stretch">
+                <button type="button"
+                        class="btn btn-primary btn-lg px-4 shadow-sm py-3 d-flex align-items-center justify-content-center"
+                        data-bs-toggle="modal"
+                        data-bs-target="#createGroupModal">
+                    <span class="fs-5 fw-bold"><i class="bi bi-plus-circle me-2"></i> Criar Novo Grupo</span>
+                </button>
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <button type="button"
+                            class="btn btn-outline-primary btn-lg px-4 flex-fill d-flex align-items-center justify-content-center"
+                            data-bs-toggle="modal"
+                            data-bs-target="#joinGroupModal">
+                        <span class="fs-6 fw-bold"><i class="bi bi-ticket-perforated me-2"></i> Tenho um Código</span>
+                    </button>
+                    <form action="{% url 'account_logout' %}"
+                          method="post"
+                          class="flex-fill d-flex">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-lg px-4 w-100 d-flex align-items-center justify-content-center">
+                            <span class="fs-6">Sair</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="mt-5 text-muted small">
+            <p>
+                Já foi adicionado? <a href="{% url 'dashboard' %}"
+    class="text-primary text-decoration-none fw-bold">Atualizar página</a>
+            </p>
+        </div>
+    </div>
+    <div class="modal fade text-start"
+         id="createGroupModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-white border-bottom-0">
+                    <h5 class="modal-title fw-bold text-primary">Novo Grupo de Trabalho</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_group' %}">
+                    {% csrf_token %}
+                    <div class="modal-body p-4 pt-0">
+                        <p class="text-muted small mb-4">Crie um espaço para gerenciar a escala. Você será o administrador.</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Nome do Local</label>
+                            {{ group_form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Modo de Gestão</label>
+                            {{ group_form.mode }}
+                            <div class="form-text small mt-2">
+                                <br>
+                                <strong>👑 Supervisionado:</strong> O Admin do grupo precisa autorizar as trocas.
+                                <br>
+                                <strong>🤝 Auto-Gerenciado:</strong> Todos trocam plantão. Sem papéis atribuidos.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4">Criar e Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-start"
+         id="joinGroupModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-white border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">Entrar em Equipe</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-primary bg-primary-subtle rounded-circle d-inline-flex p-3">
+                        <i class="bi bi-qr-code fs-1"></i>
+                    </div>
+                    <p class="text-muted small mb-3">Insira o código do convite compartilhado pelo administrador.</p>
+                    <form action="{% url 'join_via_form' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="text"
+                                   name="invite_token"
+                                   class="form-control form-control-lg text-center fw-bold text-uppercase ls-1"
+                                   placeholder="CÓDIGO"
+                                   autocomplete="off"
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Entrar Agora</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
