@@ -1,0 +1,44 @@
+{% load crispy_forms_tags %}
+<div class="modal fade"
+     id="createShiftModal"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">
+                    Novo Plantão <span class="badge bg-white text-primary ms-2 small opacity-75">{{ active_group.name }}</span>
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'dashboard' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="modal-label">Local / Tipo</label>
+                        {{ form.shift_type }}
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-7">
+                            <label class="modal-label">Início</label>
+                            {{ form.start_time }}
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="modal-label">Duração</label>
+                            {{ form.duration }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 mt-2">
+                    <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto">Salvar</button>
+                    <button type="button"
+                            class="btn btn-light text-muted w-100 w-md-auto"
+                            data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

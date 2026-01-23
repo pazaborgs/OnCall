@@ -1,53 +1,47 @@
-<div class="container mt-3">
-    <form method="get"
-          class="row g-3 align-items-center bg-white p-3"
-          style="max-width: 900px">
-        <input type="hidden" name="group_id" value="{{ active_group.id }}">
-        <input type="hidden" name="month" value="{{ current_date.month }}">
-        <input type="hidden" name="year" value="{{ current_date.year }}">
-        <div class="col-auto d-flex align-items-center">
-            <i class="bi bi-funnel-fill text-primary me-2 fs-5"></i>
-            <span class="fw-bold text-secondary text-uppercase"
-                  style="font-size: 0.85rem;
-                         letter-spacing: 0.5px">Filtrar:</span>
-        </div>
-        <div class="col-auto">
-            <select name="filter_user"
-                    class="form-select border-0 bg-light fw-bold text-dark px-3"
-                    onchange="this.form.submit()"
-                    style="cursor: pointer;
-                           min-width: 180px">
-                <option value="">Todos os Membros</option>
-                {% for member in group_members %}
-                    <option value="{{ member.id }}"
-                            {% if selected_user_id == member.id|stringformat:"s" %}selected{% endif %}>
-                        {{ member.email|truncatechars:20 }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-auto">
-            <select name="filter_type"
-                    class="form-select border-0 bg-light fw-bold text-dark px-3"
-                    onchange="this.form.submit()"
-                    style="cursor: pointer;
-                           min-width: 160px">
-                <option value="">Todos os Tipos</option>
-                {% for type in group_shift_types %}
-                    <option value="{{ type.id }}"
-                            {% if selected_type_id == type.id|stringformat:"s" %}selected{% endif %}>
-                        {{ type.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        {% if selected_user_id or selected_type_id %}
-            <div class="col-auto">
-                <a href="?group_id={{ active_group.id }}&month={{ current_date.month }}&year={{ current_date.year }}"
-                   class="btn btn-sm btn-outline-danger border-0 rounded-pill px-3 fw-bold d-flex align-items-center">
-                    <i class="bi bi-x-lg me-1"></i> Limpar
-                </a>
+<div class="mb-4">
+    <div class="bg-white p-3 rounded shadow-sm border">
+        <form method="get" class="row g-2 align-items-center">
+            <input type="hidden" name="group_id" value="{{ active_group.id }}">
+            <input type="hidden" name="month" value="{{ current_date.month }}">
+            <input type="hidden" name="year" value="{{ current_date.year }}">
+            <div class="col-12 col-md-auto text-secondary d-flex align-items-center">
+                <i class="bi bi-filter me-2 fs-5 text-primary"></i>
+                <span class="fw-bold small text-uppercase ls-1">Filtrar:</span>
             </div>
-        {% endif %}
-    </form>
+            <div class="col-12 col-md-auto">
+                <select name="filter_user"
+                        class="form-select border-0 bg-light fw-bold text-dark"
+                        onchange="this.form.submit()">
+                    <option value="">Todos os Membros</option>
+                    {% for member in group_members %}
+                        <option value="{{ member.id }}"
+                                {% if selected_user_id == member.id|stringformat:"s" %}selected{% endif %}>
+                            {{ member.email|truncatechars:25 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <select name="filter_type"
+                        class="form-select border-0 bg-light fw-bold text-dark"
+                        onchange="this.form.submit()">
+                    <option value="">Todos os Tipos</option>
+                    {% for type in group_shift_types %}
+                        <option value="{{ type.id }}"
+                                {% if selected_type_id == type.id|stringformat:"s" %}selected{% endif %}>
+                            {{ type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if selected_user_id or selected_type_id %}
+                <div class="col-12 col-md-auto ms-md-auto">
+                    <a href="?group_id={{ active_group.id }}&month={{ current_date.month }}&year={{ current_date.year }}"
+                       class="btn btn-sm btn-outline-danger border-0 rounded-pill fw-bold d-flex align-items-center justify-content-center">
+                        <i class="bi bi-x-circle-fill me-1"></i> Limpar Filtros
+                    </a>
+                </div>
+            {% endif %}
+        </form>
+    </div>
 </div>

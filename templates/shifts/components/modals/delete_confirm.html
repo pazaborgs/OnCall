@@ -1,0 +1,22 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-exclamation-circle-fill fs-1"></i>
+                </div>
+                <h6 class="fw-bold mb-2">Excluir Plantão?</h6>
+                <p class="small text-muted mb-4">Esta ação não pode ser desfeita.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button"
+                            class="btn btn-light btn-sm px-3"
+                            data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteForm" method="post" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm px-3">Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

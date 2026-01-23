@@ -1,0 +1,59 @@
+<div class="modal fade"
+     id="tradeProposalModal"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">Propor Troca</h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'create_trade_request' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border mb-3 text-center">
+                        <small class="text-muted text-uppercase fw-bold">Plantão Desejado</small>
+                        <br>
+                        <span id="targetShiftDisplay" class="fs-5 fw-bold text-primary">...</span>
+                        <input type="hidden" name="target_shift_id" id="targetShiftIdInput">
+                        <br>
+                        <small class="text-muted">Proprietário: <span id="targetShiftOwner" class="fw-bold"></span></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">O que você oferece em troca?</label>
+                        <select name="offered_shift_id" class="form-select bg-light">
+                            <option value="">NADA (Apenas assumir o plantão)</option>
+                            <optgroup label="Meus Plantões Futuros">
+                                {% for my_shift in user_future_shifts %}
+                                    <option value="{{ my_shift.id }}">
+                                        {{ my_shift.start_time|date:"d/m" }} - {{ my_shift.shift_type.name }} ({{ my_shift.start_time|date:"H:i" }})
+                                    </option>
+                                {% empty %}
+                                    <option disabled>Você não tem plantões futuros para oferecer.</option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                        <div class="form-text small">
+                            Selecione "NADA" caso queira apenas pegar o plantão para você sem dar outro em troca.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mensagem (Opcional)</label>
+                        <textarea name="message"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Ex: Preciso dessas horas, ou troco pelo dia X..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button"
+                            class="btn btn-link text-muted text-decoration-none"
+                            data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Enviar Proposta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

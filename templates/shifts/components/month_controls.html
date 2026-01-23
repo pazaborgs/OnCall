@@ -1,10 +1,17 @@
-<div class="d-flex justify-content-between align-items-center controls-bar py-3 mb-4">
+<div class="d-flex justify-content-between align-items-center py-3">
     <a href="?group_id={{ active_group.id }}&month={{ prev_date.month }}&year={{ prev_date.year }}"
-       class="btn btn-light border shadow-sm btn-control-nav">&lt;</a>
+       class="btn btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+       style="width: 40x;
+              height: 40px">
+        <i class="bi bi-chevron-left"></i>
+    </a>
     <div class="text-center">
-        <h5 class="mb-0 fw-bold text-uppercase text-dark"
-            style="letter-spacing: 0.5px">{{ current_date|date:"F Y" }}</h5>
+        <h4 class="fw-bold text-uppercase text-dark m-0">{{ current_date|date:"F Y" }}</h4>
     </div>
     <a href="?group_id={{ active_group.id }}&month={{ next_date.month }}&year={{ next_date.year }}"
-       class="btn btn-light border shadow-sm btn-control-nav">&gt;</a>
+       class="btn btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+       style="width: 40px;
+              height: 40px">
+        <i class="bi bi-chevron-right"></i>
+    </a>
 </div>

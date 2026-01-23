@@ -1,0 +1,33 @@
+<div class="modal fade"
+     id="deleteGroupModal"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white border-bottom-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Zona de Perigo
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <h4 class="fw-bold text-dark mb-3">Excluir "{{ active_group.name }}"?</h4>
+                <p class="text-muted mb-4">
+                    Tem certeza absoluta? Isso apagará <strong>todos os plantões, configurações e histórico</strong> deste grupo permanentemente para todos os membros.
+                </p>
+                <form action="{% url 'delete_group' active_group.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold">SIM, EXCLUIR TUDO</button>
+                        <button type="button"
+                                class="btn btn-light text-muted"
+                                data-bs-dismiss="modal">Cancelar, manter grupo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

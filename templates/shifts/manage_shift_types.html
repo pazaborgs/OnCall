@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block title %}Gerenciar Plantões - {{ group.name }}{% endblock %}
 {% block content %}
     <div class="container mt-4" style="max-width: 800px;">
@@ -14,35 +15,27 @@
         <div class="row g-4">
             <div class="col-md-5">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white fw-bold py-3">Adicionar Novo</div>
-                    <div class="card-body">
+                    <div class="card-header bg-white fw-bold py-3 border-bottom-0">Adicionar Novo</div>
+                    <div class="card-body p-4 pt-0">
                         <form method="post">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                {{ form.name.label_tag }}
-                                {{ form.name }}
+                            {{ form|crispy }}
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary fw-bold">Salvar Tipo</button>
                             </div>
-                            <div class="mb-3">
-                                {{ form.color.label_tag }}
-                                {{ form.color }}
-                            </div>
-                            <div class="mb-3 form-check">
-                                {{ form.is_active }}
-                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Ativo para novos plantões?</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold">Salvar Tipo</button>
                         </form>
                     </div>
                 </div>
             </div>
             <div class="col-md-7">
                 <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold py-3 border-bottom-0">Tipos Cadastrados</div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
                             {% for type in types %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-circle me-3 shadow-sm"
+                                        <div class="rounded-circle me-3 shadow-sm flex-shrink-0"
                                              style="width: 24px;
                                                     height: 24px;
                                                     background-color: {{ type.color }};
@@ -50,13 +43,14 @@
                                         <div>
                                             <h6 class="mb-0 fw-bold text-dark">{{ type.name }}</h6>
                                             {% if not type.is_active %}
-                                                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.65rem">INATIVO</span>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle mt-1"
+                                                      style="font-size: 0.65rem">INATIVO</span>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </li>
                             {% empty %}
-                                <li class="list-group-item text-center text-muted py-4">Nenhum tipo cadastrado ainda.</li>
+                                <li class="list-group-item text-center text-muted py-5 fst-italic">Nenhum tipo de plantão cadastrado neste grupo.</li>
                             {% endfor %}
                         </ul>
                     </div>

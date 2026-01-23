@@ -1,33 +1,106 @@
 <script>
-    // Função Copiar Link
+    // ==========================================
+    // Funções Globais
+    // ==========================================
+
     function copyLink(event) {
-        var copyText = document.getElementById("inviteLinkInput");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value);
+        const inputField = document.getElementById("inviteLinkInput");
 
-        var btn = event.target;
-        var originalText = btn.innerText;
-        btn.innerText = "Copiado!";
-        btn.classList.replace("btn-outline-primary", "btn-success");
-        btn.classList.add("text-white");
+        if (!inputField) return;
 
-        setTimeout(function() {
-            btn.innerText = originalText;
-            btn.classList.replace("btn-success", "btn-outline-primary");
-            btn.classList.remove("text-white");
-        }, 2000);
+        inputField.select();
+        inputField.setSelectionRange(0, 99999);
+
+        navigator.clipboard.writeText(inputField.value).then(() => {
+            const btn = event.target.closest('button');
+
+            if (btn) {
+                const originalHtml = btn.innerHTML;
+                const originalClass = btn.className;
+
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Copiado!';
+                btn.className = "btn btn-success text-white";
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.className = originalClass;
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error('Erro ao copiar:', err);
+            alert('Não foi possível copiar o link automaticamente.');
+        });
     }
 
-    // Função Modal Delete Dinâmico
+    // ==========================================
+    // Inicialização ao Carregar a Página
+    // ==========================================
+
     document.addEventListener('DOMContentLoaded', function() {
-        var deleteModal = document.getElementById('deleteModal');
+
+        // Modal de Exclusão (Genérico)
+        const deleteModal = document.getElementById('deleteModal');
         if (deleteModal) {
             deleteModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var actionUrl = button.getAttribute('data-bs-action');
-                var form = deleteModal.querySelector('#deleteForm');
-                form.action = actionUrl;
+                const button = event.relatedTarget;
+                const actionUrl = button.getAttribute('data-bs-action');
+                const form = deleteModal.querySelector('#deleteForm');
+
+                if (form && actionUrl) {
+                    form.action = actionUrl;
+                }
+            });
+        }
+
+        // Modal de Proposta de Troca
+        const tradeModal = document.getElementById('tradeProposalModal');
+        if (tradeModal) {
+            tradeModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+
+                const shiftId = button.getAttribute('data-shift-id');
+                const shiftInfo = button.getAttribute('data-shift-info');
+                const shiftOwner = button.getAttribute('data-shift-owner');
+
+                const modalTitle = tradeModal.querySelector('#targetShiftDisplay');
+                const modalInput = tradeModal.querySelector('#targetShiftIdInput');
+                const modalOwner = tradeModal.querySelector('#targetShiftOwner');
+
+                if (modalTitle) modalTitle.textContent = shiftInfo;
+                if (modalInput) modalInput.value = shiftId;
+                if (modalOwner) modalOwner.textContent = shiftOwner;
+            });
+        }
+
+        // Filtro de Membros
+        const searchInput = document.getElementById('memberSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const filter = this.value.toLowerCase();
+                const list = document.getElementById("membersList");
+                const items = list.getElementsByClassName("member-item");
+                const noResults = document.getElementById("noResultsMessage");
+                let visibleCount = 0;
+
+                for (let item of items) {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        item.classList.remove("d-none");
+                        item.classList.add("d-flex");
+                        visibleCount++;
+                    } else {
+                        item.classList.add("d-none");
+                        item.classList.remove("d-flex");
+                    }
+                }
+
+                if (noResults) {
+                    if (visibleCount === 0 && items.length > 0) {
+                        noResults.classList.remove("d-none");
+                    } else {
+                        noResults.classList.add("d-none");
+                    }
+                }
             });
         }
     });

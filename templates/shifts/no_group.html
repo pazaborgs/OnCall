@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 {% block title %}
     Bem-vindo ao On Call
 {% endblock title %}
@@ -17,117 +18,45 @@
             </svg>
         </div>
         <h2 class="fw-bold text-dark mb-3">Vamos começar!</h2>
-        <p class="text-muted mb-5 lead" style="max-width: 500px;">
-            Você ainda não faz parte de nenhuma escala.
-            <br>
-            Crie um novo grupo, entre com um código ou aguarde o convite.
-        </p>
-        <div class="w-100" style="max-width: 600px;">
-            <div class="d-flex flex-column gap-3 justify-content-center align-items-stretch">
+        <div class="col-md-8 col-lg-6 mb-5">
+            <p class="text-muted lead">
+                Você ainda não faz parte de nenhuma escala.
+                <br>
+                Crie um novo grupo para gerenciar ou entre em um existente.
+            </p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-5 d-flex flex-column gap-3">
+            <button type="button"
+                    class="btn btn-primary btn-lg shadow-sm py-3 fw-bold"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createGroupModal">
+                <i class="bi bi-plus-circle me-2"></i> Criar Novo Grupo
+            </button>
+            <div class="d-flex gap-3">
                 <button type="button"
-                        class="btn btn-primary btn-lg px-4 shadow-sm py-3 d-flex align-items-center justify-content-center"
+                        class="btn btn-outline-primary btn-lg flex-fill fw-bold"
                         data-bs-toggle="modal"
-                        data-bs-target="#createGroupModal">
-                    <span class="fs-5 fw-bold"><i class="bi bi-plus-circle me-2"></i> Criar Novo Grupo</span>
+                        data-bs-target="#joinGroupModal">
+                    <i class="bi bi-ticket-perforated me-2"></i> Tenho um Código
                 </button>
-                <div class="d-flex flex-column flex-sm-row gap-3">
-                    <button type="button"
-                            class="btn btn-outline-primary btn-lg px-4 flex-fill d-flex align-items-center justify-content-center"
-                            data-bs-toggle="modal"
-                            data-bs-target="#joinGroupModal">
-                        <span class="fs-6 fw-bold"><i class="bi bi-ticket-perforated me-2"></i> Tenho um Código</span>
+                <form action="{% url 'account_logout' %}" method="post" class="d-flex">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-outline-danger btn-lg px-4"
+                            title="Sair da conta">
+                        <i class="bi bi-box-arrow-right"></i>
                     </button>
-                    <form action="{% url 'account_logout' %}"
-                          method="post"
-                          class="flex-fill d-flex">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="btn btn-outline-danger btn-lg px-4 w-100 d-flex align-items-center justify-content-center">
-                            <span class="fs-6">Sair</span>
-                        </button>
-                    </form>
-                </div>
+                </form>
             </div>
         </div>
         <div class="mt-5 text-muted small">
             <p>
-                Já foi adicionado? <a href="{% url 'dashboard' %}"
-    class="text-primary text-decoration-none fw-bold">Atualizar página</a>
+                Já foi adicionado?
+                <a href="{% url 'dashboard' %}"
+                   class="text-primary text-decoration-none fw-bold">Atualizar página</a>
             </p>
         </div>
     </div>
-    <div class="modal fade text-start"
-         id="createGroupModal"
-         tabindex="-1"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-white border-bottom-0">
-                    <h5 class="modal-title fw-bold text-primary">Novo Grupo de Trabalho</h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                </div>
-                <form method="post" action="{% url 'create_group' %}">
-                    {% csrf_token %}
-                    <div class="modal-body p-4 pt-0">
-                        <p class="text-muted small mb-4">Crie um espaço para gerenciar a escala. Você será o administrador.</p>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Nome do Local</label>
-                            {{ group_form.name }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Modo de Gestão</label>
-                            {{ group_form.mode }}
-                            <div class="form-text small mt-2">
-                                <br>
-                                <strong>👑 Supervisionado:</strong> O Admin do grupo precisa autorizar as trocas.
-                                <br>
-                                <strong>🤝 Auto-Gerenciado:</strong> Todos trocam plantão. Sem papéis atribuidos.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary px-4">Criar e Entrar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade text-start"
-         id="joinGroupModal"
-         tabindex="-1"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-white border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark">Entrar em Equipe</h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <div class="mb-3 text-primary bg-primary-subtle rounded-circle d-inline-flex p-3">
-                        <i class="bi bi-qr-code fs-1"></i>
-                    </div>
-                    <p class="text-muted small mb-3">Insira o código do convite compartilhado pelo administrador.</p>
-                    <form action="{% url 'join_via_form' %}" method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <input type="text"
-                                   name="invite_token"
-                                   class="form-control form-control-lg text-center fw-bold text-uppercase ls-1"
-                                   placeholder="CÓDIGO"
-                                   autocomplete="off"
-                                   required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">Entrar Agora</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'shifts/components/modals/create_group.html' %}
+    {% include 'shifts/components/modals/join_group.html' %}
 {% endblock %}

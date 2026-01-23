@@ -44,4 +44,7 @@ class UserProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["full_name"].required = True
+        self.fields["email"].disabled = True
+        self.fields["email"].help_text = (
+            "Por segurança, o e-mail não pode ser alterado aqui."
+        )

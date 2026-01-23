@@ -199,7 +199,7 @@ def dashboard(request):
         "selected_type_id": filter_type_id if filter_type_id else None,
         "years_range": range(today.year - 1, today.year + 2),
         # Forms e Dados
-        "form": form,
+        "form": form,  # Shift form
         "group_form": GroupForm(),
         "user_groups": user_groups,
         "group_members": active_group.members.all(),

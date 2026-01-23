@@ -1,290 +1,37 @@
-<div class="modal fade"
-     id="createShiftModal"
-     tabindex="-1"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">
-                    Novo Plantão <span class="badge bg-white text-primary ms-2 small opacity-75">{{ active_group.name }}</span>
-                </h5>
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <form method="post" action="{% url 'dashboard' %}">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="modal-label">Local / Tipo</label>
-                        {{ form.shift_type }}
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-7">
-                            <label class="modal-label">Início</label>
-                            {{ form.start_time }}
-                        </div>
-                        <div class="col-12 col-md-5">
-                            <label class="modal-label">Duração</label>
-                            {{ form.duration }}
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0 mt-2">
-                    <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto">Salvar</button>
-                    <button type="button"
-                            class="btn btn-light text-muted w-100 w-md-auto"
-                            data-bs-dismiss="modal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade text-start"
-     id="createGroupModal"
-     tabindex="-1"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-white border-bottom-0">
-                <h5 class="modal-title fw-bold text-primary">Novo Grupo</h5>
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <form method="post" action="{% url 'create_group' %}">
-                {% csrf_token %}
-                <div class="modal-body p-4 pt-0">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small text-uppercase">Nome do Local</label>
-                        {{ group_form.name }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small text-uppercase">Modo de Gestão</label>
-                        {{ group_form.mode }}
-                        <div class="form-text small mt-2">
-                            <br>
-                            <strong>👑 Supervisionado:</strong> O Admin do grupo precisa autorizar as trocas.
-                            <br>
-                            <strong>🤝 Auto-Gerenciado:</strong> Todos trocam plantão. Sem papéis atribuidos.
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4">Criar e Entrar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-white border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark">Convidar para {{ active_group.name }}</h5>
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted small mb-3">Envie este link para quem você deseja adicionar ao grupo.</p>
-                <div class="input-group mb-3">
-                    <input type="text"
-                           class="form-control bg-light"
-                           value="{{ request.scheme }}://{{ request.get_host }}{% url 'join_via_link' token=active_group.invite_token|default:'erro' %}"
-                           id="inviteLinkInput"
-                           readonly>
-                    <button class="btn btn-outline-primary"
-                            type="button"
-                            onclick="copyLink(event)">Copiar</button>
-                </div>
-                <div class="text-center mt-4">
-                    <a href="{% url 'reset_invite' active_group.id %}"
-                       class="text-danger small text-decoration-none opacity-75 hover-opacity-100">⟳ Redefinir link</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade"
-     id="joinGroupModal"
-     tabindex="-1"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-white border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark">Entrar em Grupo</h5>
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <div class="mb-3 text-primary bg-primary-subtle rounded-circle d-inline-flex p-3">
-                    <i class="bi bi-qr-code fs-1"></i>
-                </div>
-                <p class="text-muted small mb-3">Insira o código do convite para acessar uma nova escala.</p>
-                <form action="{% url 'join_via_form' %}" method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <input type="text"
-                               name="invite_token"
-                               class="form-control form-control-lg text-center fw-bold text-uppercase ls-1"
-                               placeholder="CÓDIGO"
-                               autocomplete="off"
-                               required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-bold">Entrar Agora</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-4">
-                <div class="mb-3 text-danger">
-                    <i class="bi bi-exclamation-circle-fill fs-1"></i>
-                </div>
-                <h6 class="fw-bold mb-2">Excluir Plantão?</h6>
-                <p class="small text-muted mb-4">Esta ação não pode ser desfeita.</p>
-                <div class="d-flex justify-content-center gap-2">
-                    <button type="button"
-                            class="btn btn-light btn-sm px-3"
-                            data-bs-dismiss="modal">Cancelar</button>
-                    <form id="deleteForm" method="post" action="">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm px-3">Sim, Excluir</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade"
-     id="deleteGroupModal"
-     tabindex="-1"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white border-bottom-0">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Zona de Perigo
-                </h5>
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <h4 class="fw-bold text-dark mb-3">Excluir "{{ active_group.name }}"?</h4>
-                <p class="text-muted mb-4">
-                    Tem certeza absoluta? Isso apagará <strong>todos os plantões, configurações e histórico</strong> deste grupo permanentemente para todos os membros.
-                </p>
-                <form action="{% url 'delete_group' active_group.id %}" method="post">
-                    {% csrf_token %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger btn-lg fw-bold">SIM, EXCLUIR TUDO</button>
-                        <button type="button"
-                                class="btn btn-light text-muted"
-                                data-bs-dismiss="modal">Cancelar, manter grupo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% include 'shifts/components/members_list.html' %}
-<div class="modal fade"
-     id="tradeProposalModal"
-     tabindex="-1"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Propor Troca</h5>
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{% url 'create_trade_request' %}" method="post">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <div class="alert alert-light border mb-3 text-center">
-                        <small class="text-muted text-uppercase fw-bold">Plantão Desejado</small>
-                        <br>
-                        <span id="targetShiftDisplay" class="fs-5 fw-bold text-primary">...</span>
-                        <input type="hidden" name="target_shift_id" id="targetShiftIdInput">
-                        <br>
-                        <small class="text-muted">Proprietário: <span id="targetShiftOwner" class="fw-bold"></span></small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">O que você oferece em troca?</label>
-                        <select name="offered_shift_id" class="form-select bg-light">
-                            <option value="">NADA (Apenas assumir o plantão)</option>
-                            <optgroup label="Meus Plantões Futuros">
-                                {% for my_shift in user_future_shifts %}
-                                    <option value="{{ my_shift.id }}">
-                                        {{ my_shift.start_time|date:"d/m" }} - {{ my_shift.shift_type.name }} ({{ my_shift.start_time|date:"H:i" }})
-                                    </option>
-                                {% empty %}
-                                    <option disabled>Você não tem plantões futuros para oferecer.</option>
-                                {% endfor %}
-                            </optgroup>
-                        </select>
-                        <div class="form-text small">
-                            Selecione "NADA" caso queira apenas pegar o plantão para você sem dar outro em troca.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mensagem (Opcional)</label>
-                        <textarea name="message"
-                                  class="form-control"
-                                  rows="2"
-                                  placeholder="Ex: Preciso dessas horas, ou troco pelo dia X..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="button"
-                            class="btn btn-link text-muted text-decoration-none"
-                            data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4 fw-bold">Enviar Proposta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+{% include 'shifts/components/modals/create_shift.html' %}
+{% include 'shifts/components/modals/create_group.html' %}
+{% include 'shifts/components/modals/invite_modal.html' %}
+{% include 'shifts/components/modals/join_group.html' %}
+{% include 'shifts/components/modals/delete_confirm.html' %}
+{% include 'shifts/components/modals/delete_group.html' %}
+{% include 'shifts/components/modals/trade_proposal.html' %}
+{% include 'shifts/components/modals/members_list.html' %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
         // --- Lógica do Modal de Troca ---
+
         var tradeModal = document.getElementById('tradeProposalModal')
         if (tradeModal) {
             tradeModal.addEventListener('show.bs.modal', function(event) {
                 var button = event.relatedTarget
 
-                // Extrai dados
                 var shiftId = button.getAttribute('data-shift-id')
                 var shiftInfo = button.getAttribute('data-shift-info')
                 var shiftOwner = button.getAttribute('data-shift-owner')
 
-                // Preenche os campos
                 var modalTitle = tradeModal.querySelector('#targetShiftDisplay')
                 var modalInput = tradeModal.querySelector('#targetShiftIdInput')
                 var modalOwner = tradeModal.querySelector('#targetShiftOwner')
 
                 if (modalTitle) modalTitle.textContent = shiftInfo
-                if (modalInput) modalInput.value = shiftId // Fundamental para o POST funcionar
+                if (modalInput) modalInput.value = shiftId
                 if (modalOwner) modalOwner.textContent = shiftOwner
             })
         }
 
-        // --- Lógica do Modal de Exclusão (Para atualizar o action do form) ---
+        // --- Lógica do Modal de Exclusão Genérico ---
+
         var deleteModal = document.getElementById('deleteModal')
         if (deleteModal) {
             deleteModal.addEventListener('show.bs.modal', function(event) {
@@ -300,17 +47,60 @@
     });
 
     // Função para copiar link de convite
+
     function copyLink(event) {
         var copyText = document.getElementById("inviteLinkInput");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value);
+        if (copyText) {
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
 
-        var btn = event.target;
-        var originalText = btn.innerText;
-        btn.innerText = "Copiado!";
-        setTimeout(function() {
-            btn.innerText = originalText;
-        }, 2000);
+            var btn = event.target;
+            var originalText = btn.innerText;
+            btn.innerText = "Copiado!";
+            setTimeout(function() {
+                btn.innerText = originalText;
+            }, 2000);
+        }
+    }
+
+    // Função para filtras membros
+
+    function filterMembers() {
+        var input = document.getElementById('memberSearchInput');
+        var filter = input.value.toLowerCase();
+
+        var list = document.getElementById("membersList");
+        var items = list.getElementsByClassName("member-item");
+        var visibleCount = 0;
+
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+
+            var nameEl = item.getElementsByClassName("member-name")[0];
+            var emailEl = item.getElementsByClassName("member-email")[0];
+
+            if (nameEl && emailEl) {
+                var nameText = nameEl.textContent || nameEl.innerText;
+                var emailText = emailEl.textContent || emailEl.innerText;
+                var combinedText = (nameText + " " + emailText).toLowerCase();
+
+                if (combinedText.indexOf(filter) > -1) {
+                    item.classList.remove("d-none");
+                    item.classList.add("d-flex");
+                    visibleCount++;
+                } else {
+                    item.classList.add("d-none");
+                    item.classList.remove("d-flex");
+                }
+            }
+        }
+
+        var noResults = document.getElementById("noResultsMessage");
+        if (visibleCount === 0 && items.length > 0) {
+            noResults.classList.remove("d-none");
+        } else {
+            noResults.classList.add("d-none");
+        }
     }
 </script>
