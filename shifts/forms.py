@@ -17,6 +17,22 @@ class GroupForm(forms.ModelForm):
             "mode": "Modo de Gestão",
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["mode"].choices = [
+            ("SELF_MANAGED", "Auto-Gerenciado"),
+            ("SUPERVISED", "Supervisionado (Em breve...)"),
+        ]
+        self.initial["mode"] = "SELF_MANAGED"
+
+    def clean_mode(self):
+        mode = self.cleaned_data.get("mode")
+        if mode == "SUPERVISED":
+            raise forms.ValidationError(
+                "O modo Supervisionado ainda não está disponível. Por favor, selecione Auto-Gerenciado."
+            )
+        return mode
+
 
 class ShiftForm(forms.ModelForm):
     class Meta:

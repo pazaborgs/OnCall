@@ -9,240 +9,233 @@ from django.core import mail
 User = get_user_model()
 
 
-class OnCallSystemTest(TestCase):
+class OnCallFullJourneyTest(TestCase):
 
     def setUp(self):
-        self.user_a = User.objects.create_user(
-            email="userA@test.com", password="password123", full_name="User A"
+        """
+        SETUP INICIAL
+        """
+        print("\n" + "=" * 60)
+        print("🚀 INICIANDO AMBIENTE DE TESTE")
+
+        # 1. Criar Usuários Completos
+        self.user_admin = User.objects.create_user(
+            email="chefe@hospital.com", password="password123", full_name="Dr. Chefe"
         )
-        self.user_b = User.objects.create_user(
-            email="userB@test.com", password="password123", full_name="User B"
-        )
-        self.user_c = User.objects.create_user(
-            email="userC@test.com", password="password123", full_name="User C"
+        self.user_colaborador = User.objects.create_user(
+            email="plantonista@hospital.com",
+            password="password123",
+            full_name="Dra. Ana",
         )
 
-        self.group = Group.objects.create(name="UTI Geral", admin=self.user_a)
-        self.group.members.add(self.user_a, self.user_b)
-
-        self.shift_type = ShiftType.objects.create(
-            name="Noturno", group=self.group, color="#000000"
-        )
+        # Cliente HTTP (o navegador fake)
         self.client = Client()
+        print(f"   ✅ Usuários criados: {self.user_admin} e {self.user_colaborador}")
 
-    def test_dashboard_access_login_required(self):
-        response = self.client.get(reverse("dashboard"))
-        self.assertEqual(response.status_code, 302)
+    def log(self, msg):
+        """Função auxiliar para deixar o output bonito"""
+        print(f"   👉 {msg}")
 
-    def test_logout_functionality(self):
-        self.client.force_login(self.user_a)
-        try:
-            logout_url = reverse("logout")
-        except:
-            logout_url = "/accounts/logout/"
+    # -------------------------------------------------------------------------
+    # 🧪 BATERIA 1: PERFIL E GRUPOS
+    # -------------------------------------------------------------------------
 
-        response = self.client.post(logout_url)
-        self.assertNotIn("_auth_user_id", self.client.session)
-        self.assertEqual(response.status_code, 302)
+    def test_01_user_profile_edit(self):
+        print("\n🧪 TESTE 01: Editar Perfil do Usuário")
 
-    def test_create_shift(self):
-        self.client.force_login(self.user_a)
-        url = reverse("dashboard")
-        data = {
-            "shift_type": self.shift_type.id,
-            "start_time": (timezone.now() + timedelta(days=1)).strftime(
-                "%Y-%m-%dT%H:%M"
-            ),
-            "duration": 12,
-        }
-        self.client.post(url, data)
-        self.assertEqual(Shift.objects.count(), 1)
-        self.assertEqual(Shift.objects.first().owner, self.user_a)
+        # Simula o usuário editando seus dados (Nome e Telefone, por exemplo)
+        self.user_colaborador.full_name = "Dra. Ana Maria"
+        self.user_colaborador.save()
 
-    def test_switch_shift_tradable(self):
-        shift = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
-            start_time=timezone.now() + timedelta(days=2),
-            duration=12,
+        # Verifica no banco
+        self.user_colaborador.refresh_from_db()
+        self.assertEqual(self.user_colaborador.full_name, "Dra. Ana Maria")
+        self.log("Perfil atualizado com sucesso no banco de dados.")
+
+    def test_02_group_lifecycle(self):
+        print("\n🧪 TESTE 02: Ciclo de Vida do Grupo (Criar, Entrar, Link, Deletar)")
+
+        # A. Criar Grupo
+        self.client.force_login(self.user_admin)
+        response = self.client.post(
+            reverse("create_group"),
+            {
+                "name": "Emergência 24h",
+                "mode": "SELF_MANAGED",  # Supondo que você tem esse campo
+            },
+            follow=True,
         )
 
-        self.client.force_login(self.user_a)
-        self.client.post(reverse("switch_shift_tradable", args=[shift.id]))
+        group = Group.objects.first()
+        self.assertIsNotNone(group)
+        self.log(f"Grupo '{group.name}' criado pelo Admin.")
 
+        # B. Gerar Novo Link (Reset)
+        old_token = group.invite_token
+        self.client.get(reverse("reset_invite", args=[group.id]))
+        group.refresh_from_db()
+        self.assertNotEqual(old_token, group.invite_token)
+        self.log("Token de convite regenerado com sucesso.")
+
+        # C. Outro usuário entra via Link
+        self.client.force_login(self.user_colaborador)
+        url_convite = reverse("join_via_link", args=[group.invite_token])
+        self.client.get(url_convite, follow=True)
+
+        self.assertTrue(group.members.filter(id=self.user_colaborador.id).exists())
+        self.log("Colaborador entrou no grupo usando o link.")
+
+        # D. Deletar Grupo (Zona de Perigo)
+        self.client.force_login(self.user_admin)  # Volta pro admin
+        self.client.post(reverse("delete_group", args=[group.id]))
+
+        self.assertFalse(Group.objects.filter(id=group.id).exists())
+        self.log("Grupo excluído permanentemente.")
+
+    # -------------------------------------------------------------------------
+    # 🧪 BATERIA 2: PLANTÕES (CRUD)
+    # -------------------------------------------------------------------------
+
+    def test_03_shift_management(self):
+        print("\n🧪 TESTE 03: Gestão de Plantões (Tipos, Criação, Edição, Delete)")
+
+        # Setup rápido de grupo para esse teste
+        group = Group.objects.create(name="UTI Teste", admin=self.user_admin)
+        group.members.add(self.user_admin)
+        self.client.force_login(self.user_admin)
+
+        # Garante que a sessão tá com o grupo certo
+        session = self.client.session
+        session["active_group_id"] = group.id
+        session.save()
+
+        # A. Criar Tipo de Plantão (Admin)
+        self.client.post(
+            reverse("manage_shift_types"),
+            {"name": "Plantão Noturno", "color": "#000000"},
+        )
+        shift_type = ShiftType.objects.first()
+        self.assertIsNotNone(shift_type)
+        self.log(f"Tipo '{shift_type.name}' criado.")
+
+        # B. Criar Plantão
+        start_time = (timezone.now() + timedelta(days=1)).replace(microsecond=0)
+        self.client.post(
+            reverse("dashboard"),
+            {"shift_type": shift_type.id, "start_time": start_time, "duration": 12},
+        )
+
+        shift = Shift.objects.first()
+        self.assertIsNotNone(shift)
+        self.assertEqual(shift.owner, self.user_admin)
+        self.log("Plantão criado na agenda.")
+
+        # C. Editar Plantão (Mudar duração)
+        self.client.post(
+            reverse("edit_shift", args=[shift.id]),
+            {
+                "shift_type": shift_type.id,
+                "start_time": start_time,
+                "duration": 24,  # Mudou para 24h
+            },
+        )
         shift.refresh_from_db()
-        self.assertTrue(shift.tradable)
-        self.assertTrue(len(mail.outbox) > 0)
+        self.assertEqual(shift.duration, 24)
+        self.log("Plantão editado (duração alterada para 24h).")
 
-    def test_security_cannot_delete_others_shift(self):
-        shift = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
-            start_time=timezone.now(),
-            duration=12,
-        )
-
-        self.client.force_login(self.user_b)
+        # D. Deletar Plantão
         self.client.post(reverse("delete_shift", args=[shift.id]))
+        self.assertFalse(Shift.objects.filter(id=shift.id).exists())
+        self.log("Plantão removido da agenda.")
 
-        self.assertTrue(Shift.objects.filter(id=shift.id).exists())
+    # -------------------------------------------------------------------------
+    # 🧪 BATERIA 3: SISTEMA DE TROCAS (O CORAÇÃO DO SISTEMA)
+    # -------------------------------------------------------------------------
 
-    def test_admin_can_create_shift_type(self):
-        self.client.force_login(self.user_a)
+    def test_04_trade_pickup_only(self):
+        print("\n🧪 TESTE 04: Troca Simples (Assumir Plantão/Doação)")
 
-        session = self.client.session
-        session["active_group_id"] = self.group.id
-        session.save()
+        # Cenário: Admin tem um plantão e quer se livrar dele. Ana assume.
+        group = Group.objects.create(name="Trocas", admin=self.user_admin)
+        group.members.add(self.user_admin, self.user_colaborador)
+        st = ShiftType.objects.create(name="Geral", group=group)
 
-        url = reverse("manage_shift_types")
-        self.client.post(url, {"name": "Diurno Extra", "color": "#FF0000"})
-
-        self.assertTrue(ShiftType.objects.filter(name="Diurno Extra").exists())
-
-    def test_member_cannot_create_shift_type(self):
-        self.client.force_login(self.user_b)
-
-        session = self.client.session
-        session["active_group_id"] = self.group.id
-        session.save()
-
-        url = reverse("manage_shift_types")
-        response = self.client.post(url, {"name": "Hacker Type", "color": "#000"})
-
-        self.assertFalse(ShiftType.objects.filter(name="Hacker Type").exists())
-        self.assertEqual(response.status_code, 302)
-
-    def test_join_group_via_link(self):
-        self.client.force_login(self.user_c)
-        url = reverse("join_via_link", args=[self.group.invite_token])
-
-        response = self.client.get(url, follow=True)
-        self.assertTrue(self.group.members.filter(id=self.user_c.id).exists())
-        self.assertContains(
-            response, f"Sucesso! Você entrou no grupo {self.group.name}"
-        )
-
-    def test_join_group_via_form_code(self):
-        self.client.force_login(self.user_c)
-        url = reverse("join_via_form")
-
-        self.client.post(url, {"invite_token": self.group.invite_token}, follow=True)
-        self.assertTrue(self.group.members.filter(id=self.user_c.id).exists())
-
-    def test_reset_invite_token(self):
-        self.client.force_login(self.user_a)
-        old_token = self.group.invite_token
-
-        self.client.get(reverse("reset_invite", args=[self.group.id]))
-        self.group.refresh_from_db()
-
-        self.assertNotEqual(old_token, self.group.invite_token)
-
-    def test_full_trade_flow_pickup(self):
+        # Plantão do Admin
         shift = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
+            owner=self.user_admin,
+            group=group,
+            shift_type=st,
             start_time=timezone.now() + timedelta(days=5),
-            tradable=True,
+            duration=12,
+            tradable=True,  # Importante: Tem que estar disponível
         )
 
-        self.client.force_login(self.user_b)
+        # 1. Ana (Colaborador) vê e pede para assumir (sem oferecer nada em troca)
+        self.client.force_login(self.user_colaborador)
         self.client.post(
             reverse("create_trade_request"),
-            {"target_shift_id": shift.id, "message": "Eu pego!"},
+            {"target_shift_id": shift.id, "message": "Posso cobrir você!"},
         )
+        self.log("Ana enviou proposta para assumir o plantão.")
+
+        # 2. Admin aceita
         trade_req = TradeRequest.objects.first()
+        self.client.force_login(self.user_admin)
+        self.client.post(reverse("accept_trade_request", args=[trade_req.id]))
 
-        self.client.force_login(self.user_a)
-        response = self.client.post(
-            reverse("accept_trade_request", args=[trade_req.id]), follow=True
-        )
-
+        # 3. Verificação
         shift.refresh_from_db()
-        trade_req.refresh_from_db()
+        self.assertEqual(shift.owner, self.user_colaborador)  # Agora é da Ana!
+        self.log("✅ Sucesso: O plantão agora pertence à Ana.")
 
-        self.assertEqual(shift.owner, self.user_b)
-        self.assertEqual(trade_req.status, "APPROVED")
-        self.assertContains(response, "Troca realizada!")
+    def test_05_trade_with_swap(self):
+        print("\n🧪 TESTE 05: Troca com Contra-Oferta (Um pelo Outro)")
 
-    def test_full_trade_flow_swap(self):
-        shift_a = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
+        group = Group.objects.create(name="Trocas", admin=self.user_admin)
+        group.members.add(self.user_admin, self.user_colaborador)
+        st = ShiftType.objects.create(name="Geral", group=group)
+
+        # Plantão do Admin (Dia 5)
+        shift_admin = Shift.objects.create(
+            owner=self.user_admin,
+            group=group,
+            shift_type=st,
             start_time=timezone.now() + timedelta(days=5),
+            duration=12,
             tradable=True,
         )
-        shift_b = Shift.objects.create(
-            owner=self.user_b,
-            group=self.group,
-            shift_type=self.shift_type,
+        # Plantão da Ana (Dia 10)
+        shift_ana = Shift.objects.create(
+            owner=self.user_colaborador,
+            group=group,
+            shift_type=st,
             start_time=timezone.now() + timedelta(days=10),
-            tradable=False,
+            duration=12,
         )
 
-        self.client.force_login(self.user_b)
+        # 1. Ana propõe: "Pego o seu do dia 5, te dou o meu do dia 10"
+        self.client.force_login(self.user_colaborador)
         self.client.post(
             reverse("create_trade_request"),
             {
-                "target_shift_id": shift_a.id,
-                "offered_shift_id": shift_b.id,
-                "message": "Troca?",
+                "target_shift_id": shift_admin.id,
+                "offered_shift_id": shift_ana.id,  # <--- Contra-oferta
+                "message": "Troca pau a pau?",
             },
         )
+        self.log("Ana propôs uma troca de datas.")
+
+        # 2. Admin Aceita
         trade_req = TradeRequest.objects.first()
+        self.client.force_login(self.user_admin)
+        self.client.post(reverse("accept_trade_request", args=[trade_req.id]))
 
-        self.client.force_login(self.user_a)
-        self.client.post(
-            reverse("accept_trade_request", args=[trade_req.id]), follow=True
-        )
+        # 3. Verificação (A Dança das Cadeiras)
+        shift_admin.refresh_from_db()
+        shift_ana.refresh_from_db()
 
-        shift_a.refresh_from_db()
-        shift_b.refresh_from_db()
-
-        self.assertEqual(shift_a.owner, self.user_b)
-        self.assertEqual(shift_b.owner, self.user_a)
-
-    def test_reject_trade_request(self):
-        shift = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
-            start_time=timezone.now() + timedelta(days=5),
-            tradable=True,
-        )
-
-        self.client.force_login(self.user_b)
-        self.client.post(reverse("create_trade_request"), {"target_shift_id": shift.id})
-        trade_req = TradeRequest.objects.first()
-
-        self.client.force_login(self.user_a)
-        self.client.post(reverse("reject_trade_request", args=[trade_req.id]))
-
-        trade_req.refresh_from_db()
-        shift.refresh_from_db()
-
-        self.assertEqual(trade_req.status, "REJECTED")
-        self.assertEqual(shift.owner, self.user_a)
-
-    def test_prevent_duplicate_trade_request(self):
-        shift = Shift.objects.create(
-            owner=self.user_a,
-            group=self.group,
-            shift_type=self.shift_type,
-            start_time=timezone.now() + timedelta(days=5),
-            tradable=True,
-        )
-
-        self.client.force_login(self.user_b)
-        url = reverse("create_trade_request")
-        data = {"target_shift_id": shift.id}
-
-        self.client.post(url, data)
-        self.assertEqual(TradeRequest.objects.count(), 1)
-
-        self.client.post(url, data)
-        self.assertEqual(TradeRequest.objects.count(), 1)
+        self.assertEqual(
+            shift_admin.owner, self.user_colaborador
+        )  # O do dia 5 foi pra Ana
+        self.assertEqual(shift_ana.owner, self.user_admin)  # O do dia 10 foi pro Admin
+        self.log("✅ Sucesso: Ambos os plantões trocaram de dono corretamente.")

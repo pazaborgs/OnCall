@@ -232,6 +232,7 @@ def _process_group_entry(request, group):
 
 
 @login_required
+@login_required
 def create_group(request):
     if request.method == "POST":
         form = GroupForm(request.POST)
@@ -240,10 +241,16 @@ def create_group(request):
             group.admin = request.user
             group.save()
             group.members.add(request.user)
+
             request.session["active_group_id"] = group.id
+
             messages.success(request, f"Grupo '{group.name}' criado com sucesso!")
             return redirect("dashboard")
-    return render(request, "shifts/create_group.html", {"form": GroupForm()})
+        else:
+            messages.error(request, "Erro ao criar grupo. Verifique os dados.")
+            return redirect("dashboard")
+
+    return redirect("dashboard")
 
 
 @login_required
