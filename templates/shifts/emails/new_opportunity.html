@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: sans-serif;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+            }
+
+            .header {
+                background-color: #cfe2ff;
+                color: #084298;
+                padding: 15px;
+                border-radius: 8px 8px 0 0;
+                text-align: center;
+            }
+
+            /* Azul suave */
+            .details {
+                background-color: #f8f9fa;
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 5px;
+                border-left: 5px solid #0d6efd;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #0d6efd;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>📢 Plantão Disponível!</h2>
+            </div>
+            <div class="content">
+                <p>Olá equipe,</p>
+                <p>
+                    <strong>{{ owner_name }}</strong> acabou de disponibilizar um plantão para troca no grupo <strong>{{ group_name }}</strong>.
+                </p>
+                <div class="details">
+                    <p>
+                        <strong>📅 Data:</strong> {{ shift_date }}
+                    </p>
+                    <p>
+                        <strong>🕒 Horário:</strong> {{ shift_time }}
+                    </p>
+                    <p>
+                        <strong>🏷️ Tipo:</strong> {{ shift_type }}
+                    </p>
+                </div>
+                <p>Se você tem interesse em assumir ou trocar, acesse o painel agora:</p>
+                <center>
+                    <a href="{{ dashboard_url }}" class="btn">Ver Oferta</a>
+                </center>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
+            <p style="font-size: 12px; color: #999; text-align: center;">
+                Não responda este e-mail. Para negociar, use a plataforma.
+            </p>
+        </div>
+    </body>
+</html>

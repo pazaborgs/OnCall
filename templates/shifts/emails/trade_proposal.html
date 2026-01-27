@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: sans-serif;
+                color: #333;
+            }
+
+            .btn {
+                background-color: #0d6efd;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>🔄 Nova Proposta de Troca</h3>
+        <p>Olá,</p>
+        <p>
+            <strong>{{ requester.full_name|default:requester.email }}</strong> enviou uma proposta.
+        </p>
+        <div style="background: #f8f9fa; padding: 15px; margin: 10px 0;">
+            <p>
+                <strong>Plantão Alvo:</strong> {{ target.start_time|date:"d/m/Y H:i" }}
+            </p>
+            {% if msg %}
+                <p>
+                    <em>"{{ msg }}"</em>
+                </p>
+            {% endif %}
+        </div>
+        <p>
+            <a href="{{ dashboard_url }}" class="btn">Gerenciar no Painel</a>
+        </p>
+    </body>
+</html>

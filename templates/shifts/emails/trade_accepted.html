@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: sans-serif;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+            }
+
+            .header {
+                background-color: #d1e7dd;
+                color: #0f5132;
+                padding: 15px;
+                border-radius: 8px 8px 0 0;
+                text-align: center;
+            }
+
+            .details {
+                background-color: #f8f9fa;
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 5px;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #198754;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>✅ Proposta Aceita!</h2>
+            </div>
+            <div class="content">
+                <p>
+                    Olá, <strong>{{ requester_name }}</strong>,
+                </p>
+                <p>Boas notícias! Sua proposta de troca foi confirmada.</p>
+                <div class="details">
+                    <p>
+                        <strong>📅 Plantão Confirmado:</strong> {{ shift_date }}
+                    </p>
+                    <p>
+                        <strong>🏥 Grupo:</strong> {{ group_name }}
+                    </p>
+                </div>
+                <p>Sua agenda já foi atualizada no sistema.</p>
+                <center>
+                    <a href="{{ dashboard_url }}" class="btn">Ver Minha Escala</a>
+                </center>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
+            <p style="font-size: 12px; color: #999; text-align: center;">Enviado automaticamente pelo sistema On Call.</p>
+        </div>
+    </body>
+</html>

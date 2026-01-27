@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: sans-serif;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+            }
+
+            .header {
+                background-color: #f8d7da;
+                color: #842029;
+                padding: 15px;
+                border-radius: 8px 8px 0 0;
+                text-align: center;
+            }
+
+            /* Fundo vermelho claro */
+            .details {
+                background-color: #f8f9fa;
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 5px;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #6c757d;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>{{ title_text }}</h2>
+            </div>
+            <div class="content">
+                <p>
+                    Olá, <strong>{{ requester_name }}</strong>,
+                </p>
+                <p>{{ message_body }}</p>
+                <div class="details">
+                    <p>
+                        <strong>📅 Plantão Solicitado:</strong> {{ shift_date }}
+                    </p>
+                    <p>
+                        <strong>🏥 Grupo:</strong> {{ group_name }}
+                    </p>
+                </div>
+                <p>Não desanime! Verifique o painel para outras oportunidades.</p>
+                <center>
+                    <a href="{{ dashboard_url }}" class="btn">Voltar ao Painel</a>
+                </center>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
+            <p style="font-size: 12px; color: #999; text-align: center;">Enviado automaticamente pelo sistema On Call.</p>
+        </div>
+    </body>
+</html>

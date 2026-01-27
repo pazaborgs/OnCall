@@ -139,10 +139,17 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
 # Configuração de E-mail para Desenvolvimento
-# Em vez de enviar para a internet, ele "imprime" o e-mail no seu terminal (cmd/powershell)
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "On Call <sistema@oncall.com.br>"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 
+EMAIL_HOST_USER = os.getenv("EMAIL_SENDER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
+DEFAULT_FROM_EMAIL = f"On Call <{EMAIL_HOST_USER}>"
+
+# Messages
 
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
@@ -151,3 +158,6 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",  # Mapeia 'error' do Django para 'danger' do Bootstrap
 }
+
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[On Call] "

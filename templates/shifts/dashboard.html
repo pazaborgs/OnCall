@@ -1,60 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Minha Escala - On Call{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-{% endblock %}
 {% block content %}
     {% include 'shifts/components/navbar.html' %}
     {% include 'shifts/components/filters.html' %}
-    <div class="container pt-4 pb-5">
+    <div class="container pt-3 pb-5 mb-5">
         {% include 'shifts/components/incoming_trades.html' %}
-        {% if display_mode == 'monthly_grid' %}
-            {% include 'shifts/components/month_controls.html' %}
-        {% elif display_mode == 'user_extract' %}
+        {% if display_mode == 'user_extract' %}
             <div class="d-flex justify-content-center align-items-center py-3 mb-4 border-bottom">
                 <h4 class="fw-bold text-dark m-0">
                     <span class="badge bg-primary me-2">{{ req_year }}</span>
                     EXTRATO INDIVIDUAL
-                    <!--
-                    {% if filter_period_scope and filter_period_scope != 'all' %}
-                    <small class="text-muted ms-2 fs-6">({{ current_date|date:"F" }})</small>
-                    {% endif %} -->
                 </h4>
             </div>
+        {% elif display_mode == 'monthly_grid' %}
+            {% include 'shifts/components/month_controls.html' %}
         {% endif %}
         {% for day in agenda_days %}
-            <div class="row mb-2">
-                <div class="col-2 col-md-1 text-center pt-1 px-0 day-column">
+            <div class="row py-2 border-bottom align-items-center"
+                 style="min-height: 80px">
+                <div class="col-2 col-md-1 d-flex flex-column align-items-center">
                     {% if day.show_month %}
-                        <span class="badge bg-light text-dark border mb-1"
-                              style="font-size: 0.6rem">{{ day.date|date:"M"|upper }}</span>
+                        <span class="badge bg-light text-dark border mb-1 small">{{ day.date|date:"M"|upper }}</span>
                     {% endif %}
-                    <span class="d-block small text-uppercase fw-bold {% if day.is_weekend %}text-danger{% else %}text-muted{% endif %}">
-                        {{ day.date|date:"D" }}
-                    </span>
-                    <span class="day-number {% if day.is_today %}today{% endif %}">{{ day.day_number }}</span>
+                    <span class="small text-uppercase fw-bold {% if day.is_weekend %}text-danger{% else %}text-muted{% endif %}"
+                          style="font-size: 0.7rem">{{ day.date|date:"D" }}</span>
+                    <div class="d-flex justify-content-center align-items-center mt-1 {% if day.is_today %}bg-primary text-white shadow-sm{% endif %}"
+                         style="width: 35px;
+                                height: 35px;
+                                border-radius: 50%">
+                        <span class="fw-bold fs-5">{{ day.day_number }}</span>
+                    </div>
                 </div>
                 <div class="col-10 col-md-11">
                     {% if day.shifts %}
-                        {% for shift in day.shifts %}
-                            {% include 'shifts/components/shift_card.html' with shift=shift %}
-                        {% endfor %}
+                        <div class="d-flex flex-column gap-2">
+                            {% for shift in day.shifts %}
+                                {% include 'shifts/components/shift_card.html' with shift=shift %}
+                            {% endfor %}
+                        </div>
                     {% else %}
-                        <div class="py-3 border-bottom ms-1 opacity-50  ">
-                            <small class="text-muted fst-italic">Livre</small>
+                        <div class="h-100 d-flex align-items-center ps-2 opacity-50">
+                            <small class="text-muted fst-italic user-select-none">Livre</small>
                         </div>
                     {% endif %}
                 </div>
             </div>
         {% endfor %}
     </div>
-    <div class="fab-container">
+    <div class="position-fixed bottom-0 end-0 m-4 z-3">
         <button type="button"
-                class="btn btn-primary text-white"
+                class="btn btn-primary btn-lg rounded-circle shadow d-flex align-items-center justify-content-center"
+                style="width: 50px;
+                       height: 50px"
                 data-bs-toggle="modal"
                 data-bs-target="#createShiftModal">
-            <span>+</span>
+            <span class="fs-2 lh-1">+</span>
         </button>
     </div>
     {% include 'shifts/components/modals.html' %}
