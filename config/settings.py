@@ -1,47 +1,46 @@
-from pathlib import Path
 import os
+from pathlib import Path
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
+import dj_database_url
 
-load_dotenv()  # Carrega as variáveis do arquivo .env
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# -----------------------------------------------------------------------------
+# 1. Core Configuration
+# -----------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Carrega variáveis de ambiente da pasta dotenv_files
+load_dotenv(BASE_DIR / "dotenv_files" / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 DEBUG = os.getenv("DEBUG") == "True"
+ALLOWED_HOSTS = [
+    h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()
+]
+ROOT_URLCONF = "config.urls"
+WSGI_APPLICATION = "config.wsgi.application"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-
-ALLOWED_HOSTS = []
-
-AUTH_USER_MODEL = "useraccount.User"
-
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "none"
-
-# Application definition
-
+# -----------------------------------------------------------------------------
+# 2. Applications & Middleware
+# -----------------------------------------------------------------------------
 INSTALLED_APPS = [
+    # Django Core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "useraccount",
-    "shifts",
+    # Third Party
     "crispy_forms",
     "crispy_bootstrap5",
     "allauth",
     "allauth.account",
     "django_browser_reload",
+    # Local Apps
+    "useraccount",
+    "shifts",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +55,46 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
-ROOT_URLCONF = "config.urls"
+# -----------------------------------------------------------------------------
+# 3. Authentication & User Model
+# -----------------------------------------------------------------------------
+AUTH_USER_MODEL = "useraccount.User"
+
+# Login/Logout Redirection
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+# Allauth Settings
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[On Call] "
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# -----------------------------------------------------------------------------
+# 4. Database
+# -----------------------------------------------------------------------------
+
+DATABASES = {
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR /'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# -----------------------------------------------------------------------------
+# 5. Templates & Static Files
+# -----------------------------------------------------------------------------
 
 TEMPLATES = [
     {
@@ -73,91 +111,43 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+STATIC_URL = "static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# MEDIA_URL = "media/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# -----------------------------------------------------------------------------
+# 6. Internationalization
+# -----------------------------------------------------------------------------
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_L10N = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-
-STATIC_URL = "static/"
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-LOGIN_REDIRECT_URL = "/dashboard/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
-
-# Configuração do Crispy Forms
+# -----------------------------------------------------------------------------
+# 7. UI & Forms (Crispy / Messages)
+# -----------------------------------------------------------------------------
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
-# Configuração de E-mail para Desenvolvimento
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
-
-EMAIL_HOST_USER = os.getenv("EMAIL_SENDER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
-DEFAULT_FROM_EMAIL = f"On Call <{EMAIL_HOST_USER}>"
-
-# Messages
-
+# Mapeamento de tags Django para classes Bootstrap
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
     messages.SUCCESS: "success",
     messages.WARNING: "warning",
-    messages.ERROR: "danger",  # Mapeia 'error' do Django para 'danger' do Bootstrap
+    messages.ERROR: "danger",
 }
 
-
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[On Call] "
+# -----------------------------------------------------------------------------
+# 8. Email Configuration (SMTP)
+# -----------------------------------------------------------------------------
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_SENDER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
+DEFAULT_FROM_EMAIL = f"On Call <{EMAIL_HOST_USER}>"

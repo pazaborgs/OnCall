@@ -6,6 +6,8 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Django](https://img.shields.io/badge/Django-5.0-green)
 ![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue?logo=docker)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)
 
 ## 🎯 O Desafio
 
@@ -51,7 +53,7 @@ O coração do projeto. Um fluxo transacional atômico para gerenciar substitui�
 
 ## 🛠️ Arquitetura e Fluxos
 
-### 1. O Ciclo de Vida de uma Troca
+### O Ciclo de Vida de uma Troca
 
 Este diagrama ilustra como o sistema gerencia os estados de uma solicitação, desde a proposta até a efetivação no banco de dados.
 
@@ -82,7 +84,7 @@ stateDiagram-v2
 
 ```
 
-### 2. Modelagem de Dados (Core)
+### Modelagem de Dados (Core)
 
 Estrutura relacional simplificada mostrando como as solicitações de troca conectam usuários e turnos.
 
@@ -111,7 +113,7 @@ erDiagram
 
 ```
 
-## 🧠 Planejamento e Arquitetura
+## 🧠 Planejamento Focado
 
 A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Utilizei ferramentas visuais para mapear tanto a estrutura de dados quanto a jornada do usuário, garantindo que o backend suportasse todas as regras de negócio necessárias.
 
@@ -137,9 +139,61 @@ A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Ut
 
 </details>
 
-## 🚀 Como Rodar Localmente
+## 🏗️ Infraestrutura e DevOps
 
-Pré-requisitos: Python 3.10+ instalado.
+O projeto evoluiu de uma execução local simples para uma arquitetura containerizada, visando paridade entre ambientes de desenvolvimento e produção.
+
+- **Docker Compose:** Orquestração de serviços (App + Banco).
+- **PostgreSQL:** Substituição do SQLite para suportar concorrência e tipos de dados complexos.
+
+## 🚀 Como Rodar o Projeto
+
+Você pode rodar a aplicação de duas formas: utilizando **Docker** (recomendado, pois inclui o Banco de Dados PostgreSQL configurado) ou **Manualmente** (com SQLite).
+
+### Pré-requisitos
+
+- [Git](https://git-scm.com/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Para rodar com Docker)
+- [Python 3.10+](https://www.python.org/) (Apenas se for rodar manualmente)
+
+---
+
+### 🐳 Via Docker (Recomendado)
+
+Esta opção sobe a aplicação Django e um banco PostgreSQL 15 em containers isolados.
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/pazaborgs/OnCall
+   cd OnCall
+   ```
+
+2. Configure as Variáveis de Ambiente: Duplique o arquivo de exemplo para criar o seu .env oficial:
+
+```bash
+cp dotenv_files/.env.example dotenv_files/.env
+```
+
+O arquivo já vem configurado para conectar ao banco do Docker.
+
+3. Suba o ambiente:
+
+```bash
+docker compose up --build
+```
+
+_Aguarde até ver a mensagem "Starting development server at https://www.google.com/search?q=http://0.0.0.0:8000/"_
+
+4. Crie um Superusuário: Com o terminal anterior rodando, abra uma nova janela do terminal e digite:
+
+```bash
+docker compose exec djangoapp python manage.py createsuperuser
+```
+
+Acesse: http://127.0.0.1:8000
+
+### 🐍 Manualmente (Local com SQLite)
 
 1. **Clone o repositório**
 
@@ -167,13 +221,14 @@ pip install -r requirements.txt
 ```
 
 4. **Configure as Variáveis**
-   Crie um arquivo `.env` na raiz do projeto:
+   Crie o arquivo `dotenv_files/.env`.
+
+Importante: Se você copiou o exemplo do Docker, coloque uma `#` na frente da linha do banco de dados para desativá-la:
 
 ```env
-SECRET_KEY=sua_chave_secreta_local
+# DATABASE_URL=postgres://... (Comente esta linha para usar SQLite)
 DEBUG=True
-
-# Email não é necessário para testes locais
+SECRET_KEY=sua_chave_secreta_local
 ```
 
 5. **Prepare o Banco de Dados**
@@ -201,11 +256,12 @@ python manage.py test shifts
 
 ## 📝 Roadmap (Próximos Passos)
 
-- [x] MVP: Gestão de Plantões e Trocas Básicas.
-- [x] Testes Automatizados.
+- [x] **MVP:** Gestão de Plantões e Trocas Básicas.
+- [x] **Testes Automatizados.**
+- [x] **Email usando App Passwords do Google:** Enviando emails através do Google.
+- [x] **Docker e PostgreSQL:** Ambiente containerizado configurado via Docker Compose.
 - [ ] **Visualização Anual:** Grid de calendário anual para planejamento de longo prazo.
 - [ ] **Modo Supervisionado:** Fluxo onde a troca requer aprovação final de um "Chefe de Equipe".
-- [ ] **Deploy:** Configuração de ambiente de produção e Email SMTP real.
 
 ---
 

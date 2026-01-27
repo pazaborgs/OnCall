@@ -1,3 +1,9 @@
+# --- Segurança ---
+
+.env
+
+# --- Django Core ---
+
 *.log
 *.pot
 *.pyc
@@ -5,9 +11,18 @@ __pycache__/
 local_settings.py
 db.sqlite3
 media/
+
+# --- Ambientes Virtuais ---
+
 .venv/
 venv/
 env/
-.env
+
+# --- IDEs e Editores ---
 .vscode/
 .idea/
+
+# --- Python ---
+*.egg-info/
+dist/
+build/

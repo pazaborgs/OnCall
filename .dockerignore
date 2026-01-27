@@ -1,0 +1,45 @@
+# --- Segurança ---
+
+.env
+.env.\*
+secrets.json
+
+# --- Controle de Versão ---
+
+.git
+.gitignore
+
+# --- Python / Bytecode ---
+
+**pycache**
+_.pyc
+_.pyo
+\*.pyd
+
+# --- Ambientes Virtuais (Lixo local) ---
+
+.venv
+venv
+env
+ENV
+
+# --- Banco de Dados Local (Não queremos isso no container) ---
+
+db.sqlite3
+\*.sqlite3
+
+# --- Arquivos Estáticos e Mídia (Gerados em runtime) ---
+
+media/
+static/
+staticfiles/
+
+# --- IDEs e Editores ---
+
+.vscode
+.idea
+\*.swp
+
+# --- Logs ---
+
+\*.log
