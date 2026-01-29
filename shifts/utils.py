@@ -26,14 +26,12 @@ class EmailThread(threading.Thread):
                 bcc=self.bcc_list,
             )
 
-            # Se tiver HTML, anexa ele
             if self.html_message:
                 email.attach_alternative(self.html_message, "text/html")
 
             email.send(fail_silently=False)
 
         except Exception as e:
-            # Em produção, idealmente use logging, mas print resolve agora
             print(f"❌ Erro ao enviar email em background: {e}")
 
 
