@@ -1,18 +1,27 @@
 #!/bin/sh
 
-# O script para se der erro (segurança)
+# O script para se der erro imediatamente caso algum comando falhe
+
 set -e
 
 # Loop para esperar o Postgres acordar
-# Ele usa o host 'psql' e a porta '5432' que definimos no .env
-while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
-  echo "🟡 Waiting for Postgres Database Startup ($POSTGRES_HOST:$POSTGRES_PORT) ..."
-  sleep 2
-done
 
-echo "✅ Postgres Database Started Successfully ($POSTGRES_HOST:$POSTGRES_PORT)"
+if [ -n "$POSTGRES_HOST" ]; then
+  while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
+    echo "🟡 Waiting for Postgres Database Startup ($POSTGRES_HOST:$POSTGRES_PORT) ..."
+    sleep 2
+  done
+  echo "✅ Postgres Database Started Successfully ($POSTGRES_HOST:$POSTGRES_PORT)"
+fi
 
-# Roda as migrações e o servidor
 python manage.py collectstatic --noinput
 python manage.py migrate
-python manage.py runserver 0.0.0.0:8000
+
+if [ "$DEBUG" = "True" ]; then
+    echo "🔧 Modo Desenvolvimento: Rodando runserver..."
+    python manage.py runserver 0.0.0.0:8000
+else
+    echo "🚀 Modo Produção: Rodando Gunicorn..."
+    # Inicia o servidor profissional Gunicorn
+    gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
+fi
