@@ -9,9 +9,10 @@ services:
       - 8000:8000
     volumes:
       - .:/djangoapp
-      - ./data/web/static:/data/web/static/
-      - ./data/web/media:/data/web/media/
-      - ./scripts:/scripts
+      - /djangoapp/staticfiles
+      - ./data/web/media:/djangoapp/media
+      # REMOVIDO: - ./scripts:/scripts
+
     env_file:
       - ./dotenv_files/.env
     depends_on:
