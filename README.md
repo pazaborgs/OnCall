@@ -160,24 +160,26 @@ Você pode rodar a aplicação de duas formas: utilizando **Docker** (recomendad
 
 ### 🐳 Via Docker (Recomendado)
 
-Esta opção sobe a aplicação Django e um banco PostgreSQL 15 em containers isolados.
+Esta opção sobe a aplicação Django e um banco PostgreSQL em containers isolados.
 
-1. Clone o repositório:
+**1. Clone o repositório**
 
-   ```bash
-   git clone https://github.com/pazaborgs/OnCall
-   cd OnCall
-   ```
+```bash
+git clone https://github.com/pazaborgs/OnCall
+cd OnCall
+```
 
-2. Configure as Variáveis de Ambiente: Duplique o arquivo de exemplo para criar o seu .env oficial:
+**2. Configure as variáveis de ambiente**
+
+Duplique o arquivo de exemplo para criar o seu .env oficial:
 
 ```bash
 cp dotenv_files/.env.example dotenv_files/.env
 ```
 
-O arquivo já vem configurado para conectar ao banco do Docker.
+_O arquivo já vem configurado para conectar ao banco do Docker._
 
-3. Suba o ambiente:
+**3. Suba o ambiente**
 
 ```bash
 docker compose up --build
@@ -185,24 +187,26 @@ docker compose up --build
 
 _Aguarde até ver a mensagem "Starting development server at https://www.google.com/search?q=http://0.0.0.0:8000/"_
 
-4. Crie um Superusuário: Com o terminal anterior rodando, abra uma nova janela do terminal e digite:
+**4. Crie um superusuário**
+
+Com o terminal anterior rodando, abra uma nova janela do terminal e digite:
 
 ```bash
 docker compose exec djangoapp python manage.py createsuperuser
 ```
 
-Acesse: http://127.0.0.1:8000
+- Acesse: `http://127.0.0.1:8000`
 
 ### 🐍 Manualmente (Local com SQLite)
 
-1. **Clone o repositório**
+**1. Clone o repositório**
 
 ```bash
 git clone https://github.com/pazaborgs/OnCall
 cd OnCall
 ```
 
-2. **Crie e ative o ambiente virtual**
+**2. Crie e ative o ambiente virtual**
 
 ```bash
 # Windows
@@ -214,37 +218,39 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-3. **Instale as dependências**
+**3. Instale as dependências**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure as Variáveis**
-   Crie o arquivo `dotenv_files/.env`.
+**4. Configure as variáveis**
 
-Importante: Se você copiou o exemplo do Docker, coloque uma `#` na frente da linha do banco de dados para desativá-la:
+Crie o arquivo `dotenv_files/.env`.
 
-```env
+- Importante: Se você copiou o exemplo do Docker, coloque uma `#` na frente da linha do banco de dados para desativá-la:
+
+```python
 # DATABASE_URL=postgres://... (Comente esta linha para usar SQLite)
+
 DEBUG=True
 SECRET_KEY=sua_chave_secreta_local
 ```
 
-5. **Prepare o Banco de Dados**
+**5. Prepare o banco de dados**
 
 ```bash
 python manage.py migrate
-python manage.py createsuperuser # Crie seu admin
+python manage.py createsuperuser
 ```
 
-6. **Rode a Aplicação**
+**6. Rode a aplicação**
 
 ```bash
 python manage.py runserver
 ```
 
-Acesse: `http://127.0.0.1:8000`
+- Acesse: `http://127.0.0.1:8000`
 
 ## 🧪 Qualidade de Código
 

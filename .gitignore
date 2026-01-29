@@ -1,19 +1,26 @@
 # --- Segurança ---
-
 .env
+.env.*
+secrets.json
+
+# --- Dados do Docker (IMPORTANTE: ISSO AQUI QUE FALTAVA) ---
+data/
 
 # --- Django Core ---
-
 *.log
 *.pot
 *.pyc
 __pycache__/
 local_settings.py
 db.sqlite3
+
+# --- Arquivos Estáticos e Media (Gerados) ---
+# Nota: No seu Docker eles estão dentro de data/, mas é bom garantir aqui também
 media/
+static/
+staticfiles/
 
 # --- Ambientes Virtuais ---
-
 .venv/
 venv/
 env/
