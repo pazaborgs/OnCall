@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 from .forms import GroupForm, ShiftForm, ShiftTypeForm
 from .models import Group, Shift, ShiftType, TradeRequest
+from .utils import send_email_background
 
 # ------------------------------------------------------------------------------
 # Utilidades
@@ -402,47 +403,34 @@ def switch_shift_tradable(request, shift_id):
         shift.save()
 
         if shift.tradable:
-            # Notificação por E-mail
             group_members = shift.group.members.exclude(id=request.user.id)
-            bcc_list = [
-                m.email for m in group_members if m.email
-            ]  # Blind Carbon Copy (Cópia Carbono Oculta)
+            bcc_list = [m.email for m in group_members if m.email]
 
             if bcc_list:
-                try:
-                    subject = f"📢 Oportunidade em {shift.group.name}: {shift.start_time.strftime('%d/%m')}"
-                    context = {
-                        "owner_name": request.user.full_name or request.user.email,
-                        "group_name": shift.group.name,
-                        "shift_date": shift.start_time.strftime("%d/%m/%Y"),
-                        "shift_time": f"{shift.start_time.strftime('%H:%M')} - {shift.end_time.strftime('%H:%M')}",
-                        "shift_type": shift.shift_type.name,
-                        "dashboard_url": f"{getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')}/dashboard/",
-                    }
+                subject = f"📢 Oportunidade em {shift.group.name}: {shift.start_time.strftime('%d/%m')}"
 
-                    html_content = render_to_string(
-                        "shifts/emails/new_opportunity.html", context
-                    )
-                    text_content = strip_tags(html_content)
+                context = {
+                    "owner_name": request.user.full_name or request.user.email,
+                    "group_name": shift.group.name,
+                    "shift_date": shift.start_time.strftime("%d/%m/%Y"),
+                    "shift_time": f"{shift.start_time.strftime('%H:%M')} - {shift.end_time.strftime('%H:%M')}",
+                    "shift_type": shift.shift_type.name,
+                    "dashboard_url": f"{getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')}/dashboard/",
+                }
 
-                    # The BCC. Envio PARA o email do sistema (default) e a galera vai no BCC
+                html_content = render_to_string(
+                    "shifts/emails/new_opportunity.html", context
+                )
+                text_content = strip_tags(html_content)
 
-                    email = EmailMultiAlternatives(
-                        subject=subject,
-                        body=text_content,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[settings.DEFAULT_FROM_EMAIL],  # "Destinatário Fantasma"
-                        bcc=bcc_list,
-                    )
-                    email.attach_alternative(html_content, "text/html")
-                    email.send(fail_silently=True)
-
-                    print(
-                        f"📧 Aviso de oportunidade enviado para {len(bcc_list)} membros."
-                    )
-
-                except Exception as e:
-                    print(f"❌ Erro ao enviar aviso de grupo: {e}")
+                # Envia em background sem travar a tela
+                send_email_background(
+                    subject=subject,
+                    message=text_content,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                    html_message=html_content,
+                    bcc_list=bcc_list,
+                )
 
             messages.success(request, "Plantão ofertado para troca.")
         else:
@@ -500,29 +488,28 @@ def create_trade_request(request):
 
         trade.save()
 
-        try:
+        if target_shift.owner.email:
             subject = f"🔄 Nova Proposta de Troca: {target_shift.start_time.strftime('%d/%m')}"
+
+            context = {
+                "requester": request.user,
+                "target": target_shift,
+                "offered": trade.offered_shift,
+                "msg": msg,
+                "dashboard_url": f"{request.scheme}://{request.get_host()}/dashboard/",
+            }
+
             html_content = render_to_string(
-                "shifts/emails/trade_proposal.html",
-                {
-                    "requester": request.user,
-                    "target": target_shift,
-                    "offered": trade.offered_shift,
-                    "msg": msg,
-                    "dashboard_url": f"{request.scheme}://{request.get_host()}/dashboard/",
-                },
+                "shifts/emails/trade_proposal.html", context
             )
             text_content = strip_tags(html_content)
-            email = EmailMultiAlternatives(
-                subject,
-                text_content,
-                settings.DEFAULT_FROM_EMAIL,
-                [target_shift.owner.email],
+
+            send_email_background(
+                subject=subject,
+                message=text_content,
+                recipient_list=[target_shift.owner.email],
+                html_message=html_content,
             )
-            email.attach_alternative(html_content, "text/html")
-            email.send(fail_silently=True)
-        except Exception:
-            pass
 
         messages.success(request, "Proposta enviada com sucesso.")
         return HttpResponseRedirect(_get_redirect_url(request))
@@ -594,54 +581,45 @@ def reject_trade_request(request, trade_id):
 
 def _send_trade_notification(trade):
     """
-    Centraliza o envio de emails de troca (Aprovada ou Recusada).
-    O objeto 'trade' já deve vir com o status atualizado do banco.
+    Centraliza o envio de emails de troca (Aprovada ou Recusada) usando Background Task.
     """
-    try:
-        # Usa o Enum do Model para evitar erros de digitação (String Mágica)
-        if trade.status == TradeRequest.Status.APPROVED:
-            subject_prefix = "✅ Troca Confirmada"
-            template_name = "shifts/emails/trade_accepted.html"
-            title_text = "Sua proposta foi aceita!"
-            color_theme = "#198754"
-            message_body = "Boas notícias! Sua proposta de troca foi confirmada."
-        else:
-            subject_prefix = "❌ Troca Recusada"
-            template_name = "shifts/emails/trade_rejected.html"
-            title_text = "Proposta não aceita"
-            color_theme = "#dc3545"
-            message_body = (
-                "Infelizmente sua proposta de troca não pôde ser aceita neste momento."
-            )
+    if not trade.requester.email:
+        return
 
-        subject = (
-            f"{subject_prefix}: Dia {trade.target_shift.start_time.strftime('%d/%m')}"
+    # Usa o Enum do Model para evitar erros de digitação
+    if trade.status == TradeRequest.Status.APPROVED:
+        subject_prefix = "✅ Troca Confirmada"
+        template_name = "shifts/emails/trade_accepted.html"
+        title_text = "Sua proposta foi aceita!"
+        color_theme = "#198754"
+        message_body = "Boas notícias! Sua proposta de troca foi confirmada."
+    else:
+        subject_prefix = "❌ Troca Recusada"
+        template_name = "shifts/emails/trade_rejected.html"
+        title_text = "Proposta não aceita"
+        color_theme = "#dc3545"
+        message_body = (
+            "Infelizmente sua proposta de troca não pôde ser aceita neste momento."
         )
-        recipient_email = trade.requester.email
 
-        context = {
-            "requester_name": trade.requester.full_name or trade.requester.email,
-            "shift_date": trade.target_shift.start_time.strftime("%d/%m/%Y às %H:%M"),
-            "group_name": trade.group.name,
-            "dashboard_url": f"{getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')}/dashboard/",
-            "title_text": title_text,
-            "message_body": message_body,
-            "color_scheme": color_theme,
-        }
+    subject = f"{subject_prefix}: Dia {trade.target_shift.start_time.strftime('%d/%m')}"
 
-        html_content = render_to_string(template_name, context)
-        text_content = strip_tags(html_content)
+    context = {
+        "requester_name": trade.requester.full_name or trade.requester.email,
+        "shift_date": trade.target_shift.start_time.strftime("%d/%m/%Y às %H:%M"),
+        "group_name": trade.group.name,
+        "dashboard_url": f"{getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')}/dashboard/",
+        "title_text": title_text,
+        "message_body": message_body,
+        "color_scheme": color_theme,
+    }
 
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient_email],
-        )
-        msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=True)
+    html_content = render_to_string(template_name, context)
+    text_content = strip_tags(html_content)
 
-        print(f"📧 Notificação de '{trade.status}' enviada para {recipient_email}")
-
-    except Exception as e:
-        print(f"❌ Erro ao enviar email: {e}")
+    send_email_background(
+        subject=subject,
+        message=text_content,
+        recipient_list=[trade.requester.email],
+        html_message=html_content,
+    )
