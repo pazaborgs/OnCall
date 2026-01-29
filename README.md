@@ -1,13 +1,20 @@
 # 🏥 OnCall - Sistema de Gestão de Escalas
 
-> **🚧 Status do Projeto:** Em desenvolvimento ativo (MVP funcional).
+> **🚀 Status do Projeto:** No Ar (Live Production)
 
-![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange)
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![Django](https://img.shields.io/badge/Django-5.0-green)
-![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
-![Docker](https://img.shields.io/badge/Docker-Enabled-blue?logo=docker)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)
+[![Deploy](https://img.shields.io/badge/Render-Live-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://oncall-web-efsp.onrender.com)
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.0-092E20?style=for-the-badge&logo=django&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Neon](https://img.shields.io/badge/Neon-Serverless_Postgres-00E2C2?style=for-the-badge&logo=neon&logoColor=black)
+
+## 🌐 Acesso ao Sistema (Live Demo)
+
+Você pode testar a aplicação rodando em produção agora mesmo:
+
+### [🔗 Clique aqui para acessar o OnCall](https://oncall-web-efsp.onrender.com)
+
+> **⚠️ Nota Importante:** Como o projeto está hospedado no plano gratuito do **Render**, o servidor entra em modo de hibernação por inatividade. **O primeiro acesso pode levar cerca de 50 segundos para carregar**. Agradeço a paciência!
 
 ## 🎯 O Desafio
 
@@ -143,8 +150,11 @@ A robustez do **OnCall** vem de um planejamento detalhado pré-codificação. Ut
 
 O projeto evoluiu de uma execução local simples para uma arquitetura containerizada, visando paridade entre ambientes de desenvolvimento e produção.
 
-- **Docker Compose:** Orquestração de serviços (App + Banco).
-- **PostgreSQL:** Substituição do SQLite para suportar concorrência e tipos de dados complexos.
+- **Docker & Docker Compose:** Orquestração de serviços (App + Banco).
+- **Render (PaaS):** Hospedagem da aplicação Web (Django + Gunicorn).
+- **Neon Tech:** Banco de Dados Serverless PostgreSQL, separado da aplicação.
+- **WhiteNoise:** Servidor de arquivos estáticos de alta performance integrado ao Python.
+- **CI/CD:** O deploy no Render é acionado automaticamente a cada push na branch `main`.
 
 ## 🚀 Como Rodar o Projeto
 
@@ -257,6 +267,12 @@ python manage.py runserver
 O projeto conta com uma suíte de testes automatizados focada nas regras de negócio críticas (trocas e permissões).
 
 ```bash
+docker compose exec djangoapp python manage.py test shifts
+```
+
+ou (para teste local):
+
+```bash
 python manage.py test shifts
 ```
 
@@ -265,7 +281,8 @@ python manage.py test shifts
 - [x] **MVP:** Gestão de Plantões e Trocas Básicas.
 - [x] **Testes Automatizados.**
 - [x] **Email usando App Passwords do Google:** Enviando emails através do Google.
-- [x] **Docker e PostgreSQL:** Ambiente containerizado configurado via Docker Compose.
+- [x] **Docker e PostgreSQL:** Ambiente containerizado configurado via Docker Compose + Banco de dados PostgreSQL
+- [x] **Deploy:** Publicação em ambiente Cloud usando Render (App) + Neon (DB Serverless)
 - [ ] **Visualização Anual:** Grid de calendário anual para planejamento de longo prazo.
 - [ ] **Modo Supervisionado:** Fluxo onde a troca requer aprovação final de um "Chefe de Equipe".
 
